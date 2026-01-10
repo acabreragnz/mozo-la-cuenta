@@ -419,7 +419,7 @@ export default function RestaurantIVACalculator() {
               </div>
             </div>
 
-            {/* Acordeones de comprobantes */}
+            {/* Acordeones de comprobantes - Estilo Glassmorphism */}
             <div className="mt-4 space-y-2">
               {/* Acordeón Factura */}
               <div className="rounded-xl border overflow-hidden border-orange-500/30 bg-orange-950/20">
@@ -445,58 +445,40 @@ export default function RestaurantIVACalculator() {
 
                 {acordeonAbierto === "factura" && (
                   <div className="p-3 pt-0">
-                    <div className="ticket-paper rounded mt-3">
+                    <div className="glass-ticket rounded-2xl mt-3">
                       {/* Header */}
-                      <div className="ticket-header">
-                        <span className="ticket-logo">e-Ticket</span>
-                        <div className="ticket-small">PAGO: CONTADO | MONEDA: UYU</div>
-                      </div>
-
-                      {/* Section title */}
-                      <div className="ticket-section">CONSUMO FINAL</div>
-
-                      {/* Items table header */}
-                      <div className="ticket-row ticket-small" style={{ borderBottom: '1px solid #333', paddingBottom: '2px', marginBottom: '4px' }}>
-                        <span style={{ width: '35px' }}>Cant.</span>
-                        <span style={{ flex: 1 }}>Descripción</span>
-                        <span style={{ width: '70px', textAlign: 'right' }}>Total</span>
+                      <div className="glass-ticket-header">
+                        <div className="glass-ticket-label">Factura</div>
+                        <div className="glass-ticket-title">e-Ticket</div>
                       </div>
 
                       {/* Items */}
-                      <div className="ticket-row">
-                        <span style={{ width: '35px' }}>1,00</span>
-                        <span style={{ flex: 1 }}>Consumo</span>
-                        <span style={{ width: '70px', textAlign: 'right' }}>${formatMoney(montoNumerico)}</span>
-                      </div>
-                      {tipoDescuento === "factura" && descuentoPorcentaje > 0 && (
-                        <div className="ticket-row">
-                          <span style={{ width: '35px' }}>1,00</span>
-                          <span style={{ flex: 1 }}>Descuento ({descuentoPorcentaje}%)</span>
-                          <span style={{ width: '70px', textAlign: 'right' }}>-${formatMoney((montoNumerico * descuentoPorcentaje) / 100)}</span>
+                      <div className="glass-ticket-body">
+                        <div className="glass-ticket-row">
+                          <span className="glass-ticket-row-label">Consumo</span>
+                          <span className="glass-ticket-row-value">$ {formatMoney(montoNumerico)}</span>
                         </div>
-                      )}
-
-                      {/* Separator */}
-                      <div className="ticket-separator"></div>
-
-                      {/* Totals */}
-                      <div className="ticket-row">
-                        <span>Subtotal grav. 22%:</span>
-                        <span>${formatMoney(montoGravado)}</span>
-                      </div>
-                      <div className="ticket-row">
-                        <span>IVA 22%:</span>
-                        <span>${formatMoney(montoGravado * 0.22)}</span>
-                      </div>
-                      <div className="ticket-row ticket-total" style={{ marginTop: '4px' }}>
-                        <span>TOTAL:</span>
-                        <span>${formatMoney(tipoDescuento === "factura" ? montoPOS : montoNumerico)}</span>
+                        {tipoDescuento === "factura" && descuentoPorcentaje > 0 && (
+                          <div className="glass-ticket-row glass-ticket-row-discount">
+                            <span className="glass-ticket-row-label">Descuento ({descuentoPorcentaje}%)</span>
+                            <span className="glass-ticket-row-value">- $ {formatMoney((montoNumerico * descuentoPorcentaje) / 100)}</span>
+                          </div>
+                        )}
+                        <div className="glass-ticket-divider"></div>
+                        <div className="glass-ticket-row glass-ticket-row-small">
+                          <span className="glass-ticket-row-label">Subtotal grav. 22%</span>
+                          <span className="glass-ticket-row-value">$ {formatMoney(montoGravado)}</span>
+                        </div>
+                        <div className="glass-ticket-row glass-ticket-row-small">
+                          <span className="glass-ticket-row-label">IVA 22%</span>
+                          <span className="glass-ticket-row-value">$ {formatMoney(montoGravado * 0.22)}</span>
+                        </div>
                       </div>
 
-                      {/* Adenda section */}
-                      <div className="ticket-section" style={{ marginTop: '12px', marginBottom: '4px' }}>ADENDA</div>
-                      <div className="ticket-small" style={{ textAlign: 'center', color: '#666' }}>
-                        Documento generado por el sistema
+                      {/* Footer with total */}
+                      <div className="glass-ticket-footer">
+                        <span className="glass-ticket-footer-label">Total</span>
+                        <span className="glass-ticket-footer-value">$ {formatMoney(tipoDescuento === "factura" ? montoPOS : montoNumerico)}</span>
                       </div>
                     </div>
                   </div>
@@ -525,299 +507,43 @@ export default function RestaurantIVACalculator() {
 
                 {acordeonAbierto === "pos" && (
                   <div className="p-3 pt-0">
-                    <div className="voucher-paper rounded mt-3">
+                    <div className="glass-ticket rounded-2xl mt-3">
                       {/* Header */}
-                      <div style={{ textAlign: 'right', marginBottom: '4px' }} className="ticket-small">
-                        {new Date().toLocaleDateString('es-UY')}
-                      </div>
-                      <div className="voucher-brand">POS</div>
-                      <div className="voucher-subtitle">VENTA</div>
-                      <div className="ticket-small" style={{ textAlign: 'center', marginTop: '4px' }}>
-                        CREDITO - CHIP
+                      <div className="glass-ticket-header">
+                        <div className="glass-ticket-label">Voucher</div>
+                        <div className="glass-ticket-title">POS</div>
                       </div>
 
-                      {/* Separator */}
-                      <div className="ticket-separator"></div>
-
-                      {/* Transaction details */}
-                      <div className="voucher-row">
-                        <span>Importe:</span>
-                        <span>$ {formatMoney(montoPOS)}</span>
-                      </div>
-                      {ivaReembolso > 0 && (
-                        <div className="voucher-row" style={{ color: '#c65d00' }}>
-                          <span>Ley 17934:</span>
-                          <span>$ -{formatMoney(descuentoIVA)}</span>
+                      {/* Items */}
+                      <div className="glass-ticket-body">
+                        <div className="glass-ticket-row">
+                          <span className="glass-ticket-row-label">Importe</span>
+                          <span className="glass-ticket-row-value">$ {formatMoney(montoPOS)}</span>
                         </div>
-                      )}
-                      {propinaNumerico > 0 && (
-                        <div className="voucher-row">
-                          <span>Propina:</span>
-                          <span>$ {formatMoney(propinaNumerico)}</span>
-                        </div>
-                      )}
-
-                      {/* Separator */}
-                      <div className="ticket-separator"></div>
-
-                      {/* Total */}
-                      <div className="voucher-total-box">
-                        <div>TOTAL: $ {formatMoney(montoPOS + propinaNumerico - descuentoIVA)}</div>
+                        {propinaNumerico > 0 && (
+                          <div className="glass-ticket-row">
+                            <span className="glass-ticket-row-label">Propina</span>
+                            <span className="glass-ticket-row-value">$ {formatMoney(propinaNumerico)}</span>
+                          </div>
+                        )}
+                        {ivaReembolso > 0 && (
+                          <div className="glass-ticket-row glass-ticket-row-highlight">
+                            <span className="glass-ticket-row-label">Ley 17934</span>
+                            <span className="glass-ticket-row-value">- $ {formatMoney(descuentoIVA)}</span>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Footer notes */}
-                      {ivaReembolso > 0 && (
-                        <div className="voucher-note">
-                          Aplica dev. IVA Ley 17934
-                        </div>
-                      )}
-                      <div className="ticket-separator" style={{ marginTop: '8px' }}></div>
-                      <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '10px', marginTop: '4px' }}>
-                        *** COPIA CLIENTE ***
+                      {/* Footer with total */}
+                      <div className="glass-ticket-footer">
+                        <span className="glass-ticket-footer-label">Total</span>
+                        <span className="glass-ticket-footer-value">$ {formatMoney(montoPOS + propinaNumerico - descuentoIVA)}</span>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-
-            {/* ========== PROTOTIPOS DE DISEÑO ========== */}
-            <div className="mt-6 pt-4 border-t border-white/10">
-              <p className="text-xs text-slate-400 text-center mb-4">
-                Prototipos de diseño - Elegí tu favorito
-              </p>
-
-              <div className="space-y-4">
-                {/* Opción 1: Térmico Clásico (actual) */}
-                <div className="rounded-xl border border-white/10 p-3">
-                  <p className="text-xs text-orange-400 mb-2 font-medium">1. Térmico Clásico</p>
-                  <div className="ticket-paper rounded">
-                    <div className="ticket-header">
-                      <span className="ticket-logo">e-Ticket</span>
-                      <div className="ticket-small">PAGO: CONTADO | MONEDA: UYU</div>
-                    </div>
-                    <div className="ticket-section">CONSUMO FINAL</div>
-                    <div className="ticket-row">
-                      <span>Consumo</span>
-                      <span>${formatMoney(montoNumerico)}</span>
-                    </div>
-                    <div className="ticket-separator"></div>
-                    <div className="ticket-row ticket-total">
-                      <span>TOTAL:</span>
-                      <span>${formatMoney(montoNumerico)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Opción 2: Minimalista */}
-                <div className="rounded-xl border border-white/10 p-3">
-                  <p className="text-xs text-orange-400 mb-2 font-medium">2. Minimalista</p>
-                  <div style={{
-                    background: '#fff',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: '13px',
-                    color: '#1a1a1a',
-                  }}>
-                    <div style={{ textAlign: 'center', paddingBottom: '12px', borderBottom: '2px solid #f0f0f0' }}>
-                      <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase' }}>Factura</div>
-                      <div style={{ fontSize: '18px', fontWeight: '600', marginTop: '4px' }}>e-Ticket</div>
-                    </div>
-                    <div style={{ marginTop: '16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
-                        <span style={{ color: '#666' }}>Consumo</span>
-                        <span style={{ fontWeight: '500' }}>${formatMoney(montoNumerico)}</span>
-                      </div>
-                    </div>
-                    <div style={{
-                      background: '#f8f8f8',
-                      margin: '12px -16px -16px',
-                      padding: '16px',
-                      borderRadius: '0 0 12px 12px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                      <span style={{ fontSize: '14px', fontWeight: '600' }}>Total</span>
-                      <span style={{ fontSize: '20px', fontWeight: '700' }}>${formatMoney(montoNumerico)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Opción 3: Neomorfismo */}
-                <div className="rounded-xl border border-white/10 p-3">
-                  <p className="text-xs text-orange-400 mb-2 font-medium">3. Neomorfismo</p>
-                  <div style={{
-                    background: '#e8e8e8',
-                    borderRadius: '20px',
-                    padding: '20px',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: '13px',
-                    color: '#444',
-                    boxShadow: '8px 8px 16px #c5c5c5, -8px -8px 16px #ffffff',
-                  }}>
-                    <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                      <div style={{
-                        display: 'inline-block',
-                        background: '#e8e8e8',
-                        padding: '10px 20px',
-                        borderRadius: '12px',
-                        boxShadow: 'inset 4px 4px 8px #c5c5c5, inset -4px -4px 8px #ffffff',
-                        fontWeight: '600',
-                        fontSize: '14px',
-                      }}>e-Ticket</div>
-                    </div>
-                    <div style={{
-                      background: '#e8e8e8',
-                      borderRadius: '12px',
-                      padding: '12px',
-                      boxShadow: 'inset 3px 3px 6px #c5c5c5, inset -3px -3px 6px #ffffff',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
-                        <span>Consumo</span>
-                        <span style={{ fontWeight: '600' }}>${formatMoney(montoNumerico)}</span>
-                      </div>
-                    </div>
-                    <div style={{
-                      marginTop: '12px',
-                      background: '#e8e8e8',
-                      borderRadius: '12px',
-                      padding: '14px',
-                      boxShadow: '4px 4px 8px #c5c5c5, -4px -4px 8px #ffffff',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                      <span style={{ fontWeight: '600' }}>Total</span>
-                      <span style={{ fontSize: '18px', fontWeight: '700' }}>${formatMoney(montoNumerico)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Opción 4: Glassmorphism */}
-                <div className="rounded-xl border border-white/10 p-3">
-                  <p className="text-xs text-orange-400 mb-2 font-medium">4. Glassmorphism</p>
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(12px)',
-                    borderRadius: '16px',
-                    padding: '16px',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: '13px',
-                    color: '#fff',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                  }}>
-                    <div style={{ textAlign: 'center', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-                      <div style={{ fontSize: '10px', textTransform: 'uppercase', opacity: 0.7, letterSpacing: '2px' }}>Factura</div>
-                      <div style={{ fontSize: '18px', fontWeight: '600', marginTop: '4px' }}>e-Ticket</div>
-                    </div>
-                    <div style={{ marginTop: '14px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
-                        <span style={{ opacity: 0.8 }}>Consumo</span>
-                        <span style={{ fontWeight: '500' }}>${formatMoney(montoNumerico)}</span>
-                      </div>
-                    </div>
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      margin: '14px -16px -16px',
-                      padding: '14px 16px',
-                      borderRadius: '0 0 16px 16px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                      <span style={{ fontWeight: '600' }}>Total</span>
-                      <span style={{ fontSize: '20px', fontWeight: '700' }}>${formatMoney(montoNumerico)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Opción 5: Gradiente */}
-                <div className="rounded-xl border border-white/10 p-3">
-                  <p className="text-xs text-orange-400 mb-2 font-medium">5. Gradiente</p>
-                  <div style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    borderRadius: '16px',
-                    padding: '16px',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: '13px',
-                    color: '#fff',
-                  }}>
-                    <div style={{ textAlign: 'center', marginBottom: '14px' }}>
-                      <div style={{
-                        display: 'inline-block',
-                        background: 'rgba(255,255,255,0.2)',
-                        padding: '6px 16px',
-                        borderRadius: '20px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                      }}>e-Ticket</div>
-                    </div>
-                    <div style={{
-                      background: 'rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      padding: '12px',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
-                        <span style={{ opacity: 0.9 }}>Consumo</span>
-                        <span style={{ fontWeight: '600' }}>${formatMoney(montoNumerico)}</span>
-                      </div>
-                    </div>
-                    <div style={{
-                      background: 'rgba(0,0,0,0.2)',
-                      margin: '12px -16px -16px',
-                      padding: '14px 16px',
-                      borderRadius: '0 0 16px 16px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                      <span style={{ fontWeight: '600', fontSize: '14px' }}>Total</span>
-                      <span style={{ fontSize: '22px', fontWeight: '700' }}>${formatMoney(montoNumerico)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Opción 6: Dark Elegante */}
-                <div className="rounded-xl border border-white/10 p-3">
-                  <p className="text-xs text-orange-400 mb-2 font-medium">6. Dark Elegante</p>
-                  <div style={{
-                    background: '#1a1a1a',
-                    borderRadius: '16px',
-                    padding: '16px',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: '13px',
-                    color: '#e5e5e5',
-                    border: '1px solid #333',
-                  }}>
-                    <div style={{ textAlign: 'center', paddingBottom: '12px', borderBottom: '1px solid #333' }}>
-                      <div style={{ fontSize: '10px', color: '#f97316', textTransform: 'uppercase', letterSpacing: '3px' }}>Factura</div>
-                      <div style={{ fontSize: '18px', fontWeight: '600', marginTop: '4px' }}>e-Ticket</div>
-                    </div>
-                    <div style={{ marginTop: '14px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
-                        <span style={{ color: '#888' }}>Consumo</span>
-                        <span style={{ fontWeight: '500' }}>${formatMoney(montoNumerico)}</span>
-                      </div>
-                    </div>
-                    <div style={{
-                      background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                      margin: '14px -16px -16px',
-                      padding: '14px 16px',
-                      borderRadius: '0 0 16px 16px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                      <span style={{ fontWeight: '600', color: '#fff' }}>Total</span>
-                      <span style={{ fontSize: '20px', fontWeight: '700', color: '#fff' }}>${formatMoney(montoNumerico)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* ========== FIN PROTOTIPOS ========== */}
           </div>
         )}
 
