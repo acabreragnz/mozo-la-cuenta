@@ -1,4 +1,4 @@
-# 🍽️ Calculadora Restaurantes Uruguay
+# restaurant-discount-calculator
 
 Calculadora web para calcular descuentos de IVA y tarjetas de crédito en restaurantes de Uruguay.
 
