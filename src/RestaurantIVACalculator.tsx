@@ -180,14 +180,23 @@ export default function RestaurantIVACalculator() {
                 className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
             </div>
-            {expresionTieneOperador && montoNumerico > 0 && (
-              <p className="text-xs text-slate-400 mt-1">
-                = $ {formatMoney(montoNumerico)}
+            {expresionTieneOperador && (
+              <>
+                <p className="text-xs text-slate-400 mt-1">
+                  = $ {formatMoney(montoNumerico)}
+                </p>
+                {montoNumerico <= 0 && (
+                  <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                    <span>⚠️</span> El monto debe ser mayor a cero
+                  </p>
+                )}
+              </>
+            )}
+            {!expresionTieneOperador && (
+              <p className="text-xs text-slate-500 mt-1">
+                Ejemplo: 500+300 o 1000-200
               </p>
             )}
-            <p className="text-xs text-slate-500 mt-1">
-              Ejemplo: 500+300 o 1000-200
-            </p>
           </div>
 
           <div>
