@@ -108,9 +108,7 @@ export default function RestaurantIVACalculator() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3 bg-orange-500/20">
             <span className="text-3xl">🍽️</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">
-            Mozo, la cuenta!
-          </h1>
+          <h1 className="text-2xl font-bold text-white">Mozo, la cuenta!</h1>
           <p className="text-slate-400 mt-1 text-sm">
             Calculá tu ahorro en restaurantes 🇺🇾
           </p>
