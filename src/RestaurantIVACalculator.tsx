@@ -1,4 +1,46 @@
 import { useState, useMemo } from "react";
+import type { ReactNode } from "react";
+
+// Componente reutilizable para secciones colapsables
+function Collapsible({
+  abierto,
+  setAbierto,
+  icono,
+  titulo,
+  children,
+}: {
+  abierto: boolean;
+  setAbierto: (abierto: boolean) => void;
+  icono: string;
+  titulo: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
+      <button
+        onClick={() => setAbierto(!abierto)}
+        className="w-full flex items-center justify-between p-3 text-left"
+      >
+        <span className="flex items-center gap-2 text-sm font-medium text-white">
+          <span>{icono}</span> {titulo}
+        </span>
+        <span
+          className={`text-slate-400 transition-transform duration-300 ${
+            abierto ? "rotate-180" : ""
+          }`}
+        >
+          ▼
+        </span>
+      </button>
+
+      {abierto && (
+        <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function RestaurantIVACalculator() {
   const [montoExpresion, setMontoExpresion] = useState("");
@@ -9,9 +51,8 @@ export default function RestaurantIVACalculator() {
   const [porcentajeIVA, setPorcentajeIVA] = useState("9");
   const [propinaEnDescuento, setPropinaEnDescuento] = useState(true);
   const [tipoDescuento, setTipoDescuento] = useState("reembolso");
-  const [acordeonAbierto, setAcordeonAbierto] = useState<
-    "factura" | "pos" | null
-  >(null);
+  const [facturaAbierta, setFacturaAbierta] = useState(false);
+  const [posAbierto, setPosAbierto] = useState(false);
 
   // Evaluar expresión matemática de forma segura
   const evaluarExpresion = (expr: string) => {
@@ -409,142 +450,104 @@ export default function RestaurantIVACalculator() {
 
             {/* Acordeones de comprobantes */}
             <div className="mt-4 space-y-2">
-              {/* Acordeón Factura */}
-              <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
-                <button
-                  onClick={() =>
-                    setAcordeonAbierto(
-                      acordeonAbierto === "factura" ? null : "factura"
-                    )
-                  }
-                  className="w-full flex items-center justify-between p-3 text-left"
-                >
-                  <span className="flex items-center gap-2 text-sm font-medium text-white">
-                    <span>📄</span> Factura e-Ticket
+              <Collapsible
+                abierto={facturaAbierta}
+                setAbierto={setFacturaAbierta}
+                icono="📄"
+                titulo="Factura e-Ticket"
+              >
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Consumo</span>
+                  <span className="text-slate-300">
+                    $ {formatMoney(montoNumerico)}
                   </span>
-                  <span
-                    className={`text-slate-400 transition-transform duration-300 ${
-                      acordeonAbierto === "factura" ? "rotate-180" : ""
-                    }`}
-                  >
-                    ▼
-                  </span>
-                </button>
-
-                {acordeonAbierto === "factura" && (
-                  <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Consumo</span>
-                      <span className="text-slate-300">
-                        $ {formatMoney(montoNumerico)}
-                      </span>
-                    </div>
-                    {tipoDescuento === "factura" && descuentoPorcentaje > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-blue-400">
-                          Descuento ({descuentoPorcentaje}%)
-                        </span>
-                        <span className="text-blue-400">
-                          - ${" "}
-                          {formatMoney(
-                            (montoNumerico * descuentoPorcentaje) / 100
-                          )}
-                        </span>
-                      </div>
-                    )}
-                    <div className="border-t border-white/10 pt-2 mt-2">
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">
-                          Subtotal gravado (22%)
-                        </span>
-                        <span className="text-slate-300">
-                          $ {formatMoney(montoGravado)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">IVA 22%</span>
-                        <span className="text-slate-300">
-                          $ {formatMoney(montoGravado * 0.22)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="border-t border-white/10 pt-2 mt-2">
-                      <div className="flex justify-between font-semibold">
-                        <span className="text-white">Total facturado</span>
-                        <span className="text-white">
-                          ${" "}
-                          {formatMoney(
-                            tipoDescuento === "factura"
-                              ? montoPOS
-                              : montoNumerico
-                          )}
-                        </span>
-                      </div>
-                    </div>
+                </div>
+                {tipoDescuento === "factura" && descuentoPorcentaje > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-blue-400">
+                      Descuento ({descuentoPorcentaje}%)
+                    </span>
+                    <span className="text-blue-400">
+                      - ${" "}
+                      {formatMoney(
+                        (montoNumerico * descuentoPorcentaje) / 100
+                      )}
+                    </span>
                   </div>
                 )}
-              </div>
+                <div className="border-t border-white/10 pt-2 mt-2">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">
+                      Subtotal gravado (22%)
+                    </span>
+                    <span className="text-slate-300">
+                      $ {formatMoney(montoGravado)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">IVA 22%</span>
+                    <span className="text-slate-300">
+                      $ {formatMoney(montoGravado * 0.22)}
+                    </span>
+                  </div>
+                </div>
+                <div className="border-t border-white/10 pt-2 mt-2">
+                  <div className="flex justify-between font-semibold">
+                    <span className="text-white">Total facturado</span>
+                    <span className="text-white">
+                      ${" "}
+                      {formatMoney(
+                        tipoDescuento === "factura"
+                          ? montoPOS
+                          : montoNumerico
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </Collapsible>
 
-              {/* Acordeón POS */}
-              <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
-                <button
-                  onClick={() =>
-                    setAcordeonAbierto(acordeonAbierto === "pos" ? null : "pos")
-                  }
-                  className="w-full flex items-center justify-between p-3 text-left"
-                >
-                  <span className="flex items-center gap-2 text-sm font-medium text-white">
-                    <span>💳</span> Voucher POS
+              <Collapsible
+                abierto={posAbierto}
+                setAbierto={setPosAbierto}
+                icono="💳"
+                titulo="Voucher POS"
+              >
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Monto base</span>
+                  <span className="text-slate-300">
+                    $ {formatMoney(montoPOS)}
                   </span>
-                  <span
-                    className={`text-slate-400 transition-transform duration-300 ${
-                      acordeonAbierto === "pos" ? "rotate-180" : ""
-                    }`}
-                  >
-                    ▼
-                  </span>
-                </button>
-
-                {acordeonAbierto === "pos" && (
-                  <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Monto base</span>
-                      <span className="text-slate-300">
-                        $ {formatMoney(montoPOS)}
-                      </span>
-                    </div>
-                    {propinaNumerico > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Propina</span>
-                        <span className="text-slate-300">
-                          $ {formatMoney(propinaNumerico)}
-                        </span>
-                      </div>
-                    )}
-                    {ivaReembolso > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-cyan-400">
-                          Devolución IVA Ley 17.934
-                        </span>
-                        <span className="text-cyan-400">
-                          - $ {formatMoney(descuentoIVA)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="border-t border-white/10 pt-2 mt-2">
-                      <div className="flex justify-between font-semibold">
-                        <span className="text-white">Total pagado</span>
-                        <span className="text-white">
-                          ${" "}
-                          {formatMoney(
-                            montoPOS + propinaNumerico - descuentoIVA
-                          )}
-                        </span>
-                      </div>
-                    </div>
+                </div>
+                {propinaNumerico > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Propina</span>
+                    <span className="text-slate-300">
+                      $ {formatMoney(propinaNumerico)}
+                    </span>
                   </div>
                 )}
-              </div>
+                {ivaReembolso > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-cyan-400">
+                      Devolución IVA Ley 17.934
+                    </span>
+                    <span className="text-cyan-400">
+                      - $ {formatMoney(descuentoIVA)}
+                    </span>
+                  </div>
+                )}
+                <div className="border-t border-white/10 pt-2 mt-2">
+                  <div className="flex justify-between font-semibold">
+                    <span className="text-white">Total pagado</span>
+                    <span className="text-white">
+                      ${" "}
+                      {formatMoney(
+                        montoPOS + propinaNumerico - descuentoIVA
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </Collapsible>
             </div>
           </div>
         )}
