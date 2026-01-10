@@ -9,7 +9,6 @@ export default function RestaurantIVACalculator() {
   const [porcentajeIVA, setPorcentajeIVA] = useState("9");
   const [propinaEnDescuento, setPropinaEnDescuento] = useState(true);
   const [tipoDescuento, setTipoDescuento] = useState("reembolso"); // 'reembolso' o 'factura'
-  const [montoPOSManual, setMontoPOSManual] = useState("");
   const [acordeonAbierto, setAcordeonAbierto] = useState<
     "factura" | "pos" | null
   >(null);
@@ -44,10 +43,8 @@ export default function RestaurantIVACalculator() {
       ? montoNumerico * (1 - descuentoPorcentaje / 100)
       : montoNumerico;
 
-  // Monto en POS: puede ser manual (redondeado) o el calculado
-  const montoPOSCalculado = montoDescontadoFactura;
-  const montoPOS =
-    montoPOSManual !== "" ? parseFloat(montoPOSManual) || 0 : montoPOSCalculado;
+  // Monto en POS
+  const montoPOS = montoDescontadoFactura;
 
   // Calcular propina sobre el monto del POS (no sobre el e-ticket)
   const propinaNumerico = useMemo(() => {
@@ -333,24 +330,10 @@ export default function RestaurantIVACalculator() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 text-sm">
-                  <div className="flex-1">
-                    <span className="text-slate-400">Monto en POS</span>
-                    <p className="text-xs text-slate-500">
-                      Editá si redondearon
-                    </p>
-                  </div>
-                  <div className="relative w-28">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
-                      $
-                    </span>
-                    <input
-                      type="number"
-                      value={montoPOSManual}
-                      onChange={(e) => setMontoPOSManual(e.target.value)}
-                      placeholder={formatMoney(montoPOSCalculado)}
-                      className="w-full pl-6 pr-2 py-1 text-sm bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:border-orange-500 focus:outline-none text-right"
-                    />
-                  </div>
+                  <span className="text-slate-400">Monto en POS</span>
+                  <span className="text-slate-300">
+                    $ {formatMoney(montoPOS)}
+                  </span>
                 </div>
               </>
             )}
@@ -364,11 +347,6 @@ export default function RestaurantIVACalculator() {
                       ? `(${propinaPorcentaje}%)`
                       : ""}
                   </span>
-                  {tipoPropina === "porcentaje" && montoPOSManual !== "" && (
-                    <p className="text-xs text-slate-500">
-                      Sobre POS $ {formatMoney(montoPOS)}
-                    </p>
-                  )}
                 </div>
                 <span className="text-slate-300">
                   $ {formatMoney(propinaNumerico)}
@@ -413,7 +391,6 @@ export default function RestaurantIVACalculator() {
                   </span>
                   <p className="text-xs text-slate-500">
                     Sobre gravado $ {formatMoney(montoGravado)}
-                    {montoPOSManual !== "" && " (POS)"}
                   </p>
                 </div>
                 <span className="text-orange-400">
