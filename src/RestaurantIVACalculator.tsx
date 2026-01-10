@@ -105,8 +105,8 @@ export default function RestaurantIVACalculator() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-orange-900 via-red-900 to-slate-900">
       <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-orange-950/40 border-orange-500/20">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3 bg-orange-500/20">
-            <img src="/favicon.jpg" alt="Mozo, la cuenta!" className="w-10 h-10 rounded-xl" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 bg-orange-500/20 p-1">
+            <img src="/favicon.jpg" alt="Mozo, la cuenta!" className="w-full h-full rounded-xl" />
           </div>
           <h1 className="text-2xl font-bold text-white">Mozo, la cuenta!</h1>
           <p className="text-slate-400 mt-1 text-sm">
