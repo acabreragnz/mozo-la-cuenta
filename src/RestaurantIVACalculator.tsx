@@ -9,9 +9,8 @@ export default function RestaurantIVACalculator() {
   const [porcentajeIVA, setPorcentajeIVA] = useState("9");
   const [propinaEnDescuento, setPropinaEnDescuento] = useState(true);
   const [tipoDescuento, setTipoDescuento] = useState("reembolso"); // 'reembolso' o 'factura'
-  const [acordeonAbierto, setAcordeonAbierto] = useState<
-    "factura" | "pos" | null
-  >(null);
+  const [facturaAbierta, setFacturaAbierta] = useState(false);
+  const [posAbierto, setPosAbierto] = useState(false);
 
   // Evaluar expresión matemática de forma segura
   const evaluarExpresion = (expr: string) => {
@@ -424,11 +423,7 @@ export default function RestaurantIVACalculator() {
               {/* Acordeón Factura */}
               <div className="rounded-xl border overflow-hidden border-orange-500/30 bg-orange-950/20">
                 <button
-                  onClick={() =>
-                    setAcordeonAbierto(
-                      acordeonAbierto === "factura" ? null : "factura"
-                    )
-                  }
+                  onClick={() => setFacturaAbierta(!facturaAbierta)}
                   className="w-full flex items-center justify-between p-3 text-left"
                 >
                   <span className="flex items-center gap-2 text-sm font-medium text-white">
@@ -436,14 +431,14 @@ export default function RestaurantIVACalculator() {
                   </span>
                   <span
                     className={`text-slate-400 transition-transform duration-300 ${
-                      acordeonAbierto === "factura" ? "rotate-180" : ""
+                      facturaAbierta ? "rotate-180" : ""
                     }`}
                   >
                     ▼
                   </span>
                 </button>
 
-                {acordeonAbierto === "factura" && (
+                {facturaAbierta && (
                   <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
                     <div className="flex justify-between">
                       <span className="text-slate-400">Consumo</span>
@@ -500,9 +495,7 @@ export default function RestaurantIVACalculator() {
               {/* Acordeón POS */}
               <div className="rounded-xl border overflow-hidden border-orange-500/30 bg-orange-950/20">
                 <button
-                  onClick={() =>
-                    setAcordeonAbierto(acordeonAbierto === "pos" ? null : "pos")
-                  }
+                  onClick={() => setPosAbierto(!posAbierto)}
                   className="w-full flex items-center justify-between p-3 text-left"
                 >
                   <span className="flex items-center gap-2 text-sm font-medium text-white">
@@ -510,14 +503,14 @@ export default function RestaurantIVACalculator() {
                   </span>
                   <span
                     className={`text-slate-400 transition-transform duration-300 ${
-                      acordeonAbierto === "pos" ? "rotate-180" : ""
+                      posAbierto ? "rotate-180" : ""
                     }`}
                   >
                     ▼
                   </span>
                 </button>
 
-                {acordeonAbierto === "pos" && (
+                {posAbierto && (
                   <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
                     <div className="flex justify-between">
                       <span className="text-slate-400">Monto base</span>
