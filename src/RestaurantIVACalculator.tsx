@@ -1,113 +1,5 @@
 import { useState, useMemo } from "react";
 
-// Definición de paletas de colores para la app
-const paletas = {
-  naranja: {
-    nombre: "Naranja Cálido",
-    descripcion: "Clásico de restaurante",
-    fondo: "bg-gradient-to-br from-orange-900 via-red-900 to-slate-900",
-    tarjeta: "bg-orange-950/40",
-    bordeCard: "border-orange-500/20",
-    botonActivo: "bg-orange-500",
-    botonInactivo: "text-slate-400 hover:text-white",
-    inputFocus: "focus:border-orange-500 focus:ring-orange-500/20",
-    acento: "text-orange-400",
-    acordeonBorde: "border-orange-500/30",
-    acordeonBg: "bg-orange-950/20",
-    gradienteResultado: "bg-gradient-to-r from-orange-500 to-red-500",
-    textoResultado: "text-orange-100",
-    toggle: "bg-orange-500",
-    preview: "bg-gradient-to-r from-orange-500 to-red-500",
-  },
-  esmeralda: {
-    nombre: "Esmeralda Fresco",
-    descripcion: "Natural y moderno",
-    fondo: "bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900",
-    tarjeta: "bg-emerald-950/40",
-    bordeCard: "border-emerald-500/20",
-    botonActivo: "bg-emerald-500",
-    botonInactivo: "text-slate-400 hover:text-white",
-    inputFocus: "focus:border-emerald-500 focus:ring-emerald-500/20",
-    acento: "text-emerald-400",
-    acordeonBorde: "border-emerald-500/30",
-    acordeonBg: "bg-emerald-950/20",
-    gradienteResultado: "bg-gradient-to-r from-emerald-500 to-teal-500",
-    textoResultado: "text-emerald-100",
-    toggle: "bg-emerald-500",
-    preview: "bg-gradient-to-r from-emerald-500 to-teal-500",
-  },
-  violeta: {
-    nombre: "Violeta Elegante",
-    descripcion: "Sofisticado y premium",
-    fondo: "bg-gradient-to-br from-violet-900 via-purple-900 to-slate-900",
-    tarjeta: "bg-violet-950/40",
-    bordeCard: "border-violet-500/20",
-    botonActivo: "bg-violet-500",
-    botonInactivo: "text-slate-400 hover:text-white",
-    inputFocus: "focus:border-violet-500 focus:ring-violet-500/20",
-    acento: "text-violet-400",
-    acordeonBorde: "border-violet-500/30",
-    acordeonBg: "bg-violet-950/20",
-    gradienteResultado: "bg-gradient-to-r from-violet-500 to-purple-500",
-    textoResultado: "text-violet-100",
-    toggle: "bg-violet-500",
-    preview: "bg-gradient-to-r from-violet-500 to-purple-500",
-  },
-  rosa: {
-    nombre: "Rosa Moderno",
-    descripcion: "Trendy y vibrante",
-    fondo: "bg-gradient-to-br from-pink-900 via-rose-900 to-slate-900",
-    tarjeta: "bg-pink-950/40",
-    bordeCard: "border-pink-500/20",
-    botonActivo: "bg-pink-500",
-    botonInactivo: "text-slate-400 hover:text-white",
-    inputFocus: "focus:border-pink-500 focus:ring-pink-500/20",
-    acento: "text-pink-400",
-    acordeonBorde: "border-pink-500/30",
-    acordeonBg: "bg-pink-950/20",
-    gradienteResultado: "bg-gradient-to-r from-pink-500 to-rose-500",
-    textoResultado: "text-pink-100",
-    toggle: "bg-pink-500",
-    preview: "bg-gradient-to-r from-pink-500 to-rose-500",
-  },
-  ambar: {
-    nombre: "Ámbar Dorado",
-    descripcion: "Luminoso y acogedor",
-    fondo: "bg-gradient-to-br from-amber-900 via-yellow-900 to-slate-900",
-    tarjeta: "bg-amber-950/40",
-    bordeCard: "border-amber-500/20",
-    botonActivo: "bg-amber-500",
-    botonInactivo: "text-slate-400 hover:text-white",
-    inputFocus: "focus:border-amber-500 focus:ring-amber-500/20",
-    acento: "text-amber-400",
-    acordeonBorde: "border-amber-500/30",
-    acordeonBg: "bg-amber-950/20",
-    gradienteResultado: "bg-gradient-to-r from-amber-500 to-yellow-500",
-    textoResultado: "text-amber-100",
-    toggle: "bg-amber-500",
-    preview: "bg-gradient-to-r from-amber-500 to-yellow-500",
-  },
-  cian: {
-    nombre: "Cian Océano",
-    descripcion: "Fresco y profesional",
-    fondo: "bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900",
-    tarjeta: "bg-cyan-950/40",
-    bordeCard: "border-cyan-500/20",
-    botonActivo: "bg-cyan-500",
-    botonInactivo: "text-slate-400 hover:text-white",
-    inputFocus: "focus:border-cyan-500 focus:ring-cyan-500/20",
-    acento: "text-cyan-400",
-    acordeonBorde: "border-cyan-500/30",
-    acordeonBg: "bg-cyan-950/20",
-    gradienteResultado: "bg-gradient-to-r from-cyan-500 to-sky-500",
-    textoResultado: "text-cyan-100",
-    toggle: "bg-cyan-500",
-    preview: "bg-gradient-to-r from-cyan-500 to-sky-500",
-  },
-} as const;
-
-type PaletaKey = keyof typeof paletas;
-
 export default function RestaurantIVACalculator() {
   const [montoExpresion, setMontoExpresion] = useState("");
   const [propinaPorcentaje, setPropinaPorcentaje] = useState("10");
@@ -116,27 +8,17 @@ export default function RestaurantIVACalculator() {
   const [descuentoTarjeta, setDescuentoTarjeta] = useState("");
   const [porcentajeIVA, setPorcentajeIVA] = useState("9");
   const [propinaEnDescuento, setPropinaEnDescuento] = useState(true);
-  const [tipoDescuento, setTipoDescuento] = useState("reembolso"); // 'reembolso' o 'factura'
+  const [tipoDescuento, setTipoDescuento] = useState("reembolso");
   const [acordeonAbierto, setAcordeonAbierto] = useState<
     "factura" | "pos" | null
   >(null);
-
-  // Estado para el selector de paleta de colores
-  const [paletaActual, setPaletaActual] = useState<PaletaKey>("naranja");
-  const [selectorVisible, setSelectorVisible] = useState(true);
-
-  // Obtener la paleta actual
-  const p = paletas[paletaActual];
 
   // Evaluar expresión matemática de forma segura
   const evaluarExpresion = (expr: string) => {
     if (!expr || expr.trim() === "") return 0;
     try {
-      // Solo permitir números, operadores básicos, paréntesis y puntos
       const sanitized = expr.replace(/[^0-9+\-*/.() ]/g, "");
       if (!sanitized) return 0;
-
-      // Evaluar de forma segura usando Function
       const result = new Function(`return ${sanitized}`)();
       return isNaN(result) || !isFinite(result) ? 0 : result;
     } catch {
@@ -152,20 +34,15 @@ export default function RestaurantIVACalculator() {
   const descuentoPorcentaje = parseFloat(descuentoTarjeta) || 0;
   const ivaReembolso = parseFloat(porcentajeIVA) || 0;
 
-  // Cálculos según tipo de descuento
   const montoDescontadoFactura =
     tipoDescuento === "factura"
       ? montoNumerico * (1 - descuentoPorcentaje / 100)
       : montoNumerico;
 
-  // Monto en POS
   const montoPOS = montoDescontadoFactura;
 
-  // Calcular propina sobre el monto del POS (no sobre el e-ticket)
   const propinaNumerico = useMemo(() => {
-    // La propina siempre se calcula sobre el monto que va al POS
     const basePropina = montoPOS;
-
     if (tipoPropina === "porcentaje") {
       const pct = parseFloat(propinaPorcentaje) || 0;
       return basePropina * (pct / 100);
@@ -182,20 +59,16 @@ export default function RestaurantIVACalculator() {
 
   const subtotal = montoNumerico + propinaNumerico;
 
-  // Para reembolso, el descuento se calcula sobre subtotal o solo monto
   const baseDescuentoTarjeta = propinaEnDescuento ? subtotal : montoNumerico;
   const montoDescuentoTarjeta =
     tipoDescuento === "reembolso"
       ? baseDescuentoTarjeta * (descuentoPorcentaje / 100)
       : montoNumerico * (descuentoPorcentaje / 100);
 
-  // Base gravada: siempre sobre el monto efectivamente facturado (sin propina)
-  // Si es descuento en factura, usar el monto del POS (puede ser redondeado)
   const montoParaIVA = tipoDescuento === "factura" ? montoPOS : montoNumerico;
   const montoGravado = montoParaIVA / 1.22;
   const descuentoIVA = montoGravado * (ivaReembolso / 100);
 
-  // Total final
   const precioFinal =
     tipoDescuento === "factura"
       ? montoPOS + propinaNumerico - descuentoIVA
@@ -214,58 +87,10 @@ export default function RestaurantIVACalculator() {
   const expresionTieneOperador = /[+\-*/]/.test(montoExpresion);
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 ${p.fondo} transition-all duration-500`}>
-      {/* Selector de Paleta de Colores */}
-      {selectorVisible && (
-        <div className="fixed top-4 right-4 z-50">
-          <div className="backdrop-blur-lg rounded-2xl shadow-2xl p-4 border bg-slate-900/90 border-white/20 max-w-xs">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-white font-semibold text-sm">Elegí el color</h3>
-              <button
-                onClick={() => setSelectorVisible(false)}
-                className="text-slate-400 hover:text-white text-xs"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {(Object.keys(paletas) as PaletaKey[]).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setPaletaActual(key)}
-                  className={`p-2 rounded-xl border transition-all ${
-                    paletaActual === key
-                      ? "border-white ring-2 ring-white/50"
-                      : "border-white/20 hover:border-white/40"
-                  }`}
-                >
-                  <div className={`h-6 rounded-lg mb-1 ${paletas[key].preview}`} />
-                  <p className="text-white text-xs font-medium">{paletas[key].nombre}</p>
-                  <p className="text-slate-500 text-[10px]">{paletas[key].descripcion}</p>
-                </button>
-              ))}
-            </div>
-            <p className="text-slate-500 text-[10px] mt-3 text-center">
-              Una vez que elijas, esto se borrará
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Botón para mostrar selector si está oculto */}
-      {!selectorVisible && (
-        <button
-          onClick={() => setSelectorVisible(true)}
-          className="fixed top-4 right-4 z-50 p-3 rounded-full backdrop-blur-lg shadow-lg border bg-slate-900/80 border-white/20 hover:bg-slate-800/80 transition-all"
-          title="Cambiar colores"
-        >
-          <span className="text-lg">🎨</span>
-        </button>
-      )}
-
-      <div className={`backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border ${p.tarjeta} ${p.bordeCard} transition-all duration-500`}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900">
+      <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-cyan-950/40 border-cyan-500/20">
         <div className="text-center mb-6">
-          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 ${p.tarjeta} p-1`}>
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 bg-cyan-950/40 p-1">
             <img src="/favicon.jpg" alt="Mozo, la cuenta!" className="w-full h-full rounded-xl" />
           </div>
           <h1 className="text-2xl font-bold text-white">Mozo, la cuenta!</h1>
@@ -289,7 +114,7 @@ export default function RestaurantIVACalculator() {
                 value={montoExpresion}
                 onChange={(e) => setMontoExpresion(e.target.value)}
                 placeholder="0.00 o 500+300"
-                className={`w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all ${p.inputFocus}`}
+                className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
             </div>
             {expresionTieneOperador && montoNumerico > 0 && (
@@ -312,8 +137,8 @@ export default function RestaurantIVACalculator() {
                   onClick={() => setTipoPropina("porcentaje")}
                   className={`px-2 py-1 text-xs rounded-md transition-all ${
                     tipoPropina === "porcentaje"
-                      ? `${p.botonActivo} text-white`
-                      : p.botonInactivo
+                      ? "bg-cyan-500 text-white"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
                   %
@@ -322,8 +147,8 @@ export default function RestaurantIVACalculator() {
                   onClick={() => setTipoPropina("fija")}
                   className={`px-2 py-1 text-xs rounded-md transition-all ${
                     tipoPropina === "fija"
-                      ? `${p.botonActivo} text-white`
-                      : p.botonInactivo
+                      ? "bg-cyan-500 text-white"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
                   $
@@ -347,7 +172,7 @@ export default function RestaurantIVACalculator() {
                     : setPropinaFija(e.target.value)
                 }
                 placeholder={tipoPropina === "porcentaje" ? "10" : "0.00"}
-                className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all ${p.inputFocus} ${
+                className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20 ${
                   tipoPropina === "fija" ? "pl-10 pr-4" : "pl-4 pr-10"
                 }`}
               />
@@ -377,7 +202,7 @@ export default function RestaurantIVACalculator() {
                 placeholder="9"
                 min="0"
                 max="22"
-                className={`w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all ${p.inputFocus}`}
+                className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
                 %
@@ -401,7 +226,7 @@ export default function RestaurantIVACalculator() {
                 placeholder="0"
                 min="0"
                 max="100"
-                className={`w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all ${p.inputFocus}`}
+                className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
                 %
@@ -418,8 +243,8 @@ export default function RestaurantIVACalculator() {
                     onClick={() => setTipoDescuento("reembolso")}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                       tipoDescuento === "reembolso"
-                        ? `${p.botonActivo} text-white`
-                        : p.botonInactivo
+                        ? "bg-cyan-500 text-white"
+                        : "text-slate-400 hover:text-white"
                     }`}
                   >
                     Reembolso
@@ -428,8 +253,8 @@ export default function RestaurantIVACalculator() {
                     onClick={() => setTipoDescuento("factura")}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                       tipoDescuento === "factura"
-                        ? `${p.botonActivo} text-white`
-                        : p.botonInactivo
+                        ? "bg-cyan-500 text-white"
+                        : "text-slate-400 hover:text-white"
                     }`}
                   >
                     En factura
@@ -450,7 +275,7 @@ export default function RestaurantIVACalculator() {
               >
                 <div
                   className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                    propinaEnDescuento ? p.toggle : "bg-white/20"
+                    propinaEnDescuento ? "bg-cyan-500" : "bg-white/20"
                   }`}
                 >
                   <div
@@ -549,33 +374,33 @@ export default function RestaurantIVACalculator() {
             {ivaReembolso > 0 && (
               <div className="flex justify-between items-center py-2 text-sm">
                 <div>
-                  <span className={p.acento}>
+                  <span className="text-cyan-400">
                     Devolución IVA ({ivaReembolso}%)
                   </span>
                   <p className="text-xs text-slate-500">
                     Sobre gravado $ {formatMoney(montoGravado)}
                   </p>
                 </div>
-                <span className={p.acento}>
+                <span className="text-cyan-400">
                   - $ {formatMoney(descuentoIVA)}
                 </span>
               </div>
             )}
 
-            <div className={`rounded-2xl p-4 mt-3 ${p.gradienteResultado} transition-all duration-500`}>
+            <div className="rounded-2xl p-4 mt-3 bg-gradient-to-r from-cyan-500 to-sky-500">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className={`text-sm ${p.textoResultado}`}>Pagás</p>
+                  <p className="text-sm text-cyan-100">Pagás</p>
                   <p className="text-white text-2xl font-bold">
                     $ {formatMoney(precioFinal)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-sm ${p.textoResultado}`}>Ahorrás</p>
+                  <p className="text-sm text-cyan-100">Ahorrás</p>
                   <p className="text-white text-lg font-semibold">
                     $ {formatMoney(ahorroTotal)}
                   </p>
-                  <p className={`text-xs ${p.textoResultado}`}>
+                  <p className="text-xs text-cyan-100">
                     ({porcentajeAhorro.toFixed(1)}%)
                   </p>
                 </div>
@@ -585,7 +410,7 @@ export default function RestaurantIVACalculator() {
             {/* Acordeones de comprobantes */}
             <div className="mt-4 space-y-2">
               {/* Acordeón Factura */}
-              <div className={`rounded-xl border overflow-hidden ${p.acordeonBorde} ${p.acordeonBg} transition-all duration-500`}>
+              <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
                 <button
                   onClick={() =>
                     setAcordeonAbierto(
@@ -661,7 +486,7 @@ export default function RestaurantIVACalculator() {
               </div>
 
               {/* Acordeón POS */}
-              <div className={`rounded-xl border overflow-hidden ${p.acordeonBorde} ${p.acordeonBg} transition-all duration-500`}>
+              <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
                 <button
                   onClick={() =>
                     setAcordeonAbierto(acordeonAbierto === "pos" ? null : "pos")
@@ -698,10 +523,10 @@ export default function RestaurantIVACalculator() {
                     )}
                     {ivaReembolso > 0 && (
                       <div className="flex justify-between">
-                        <span className={p.acento}>
+                        <span className="text-cyan-400">
                           Devolución IVA Ley 17.934
                         </span>
-                        <span className={p.acento}>
+                        <span className="text-cyan-400">
                           - $ {formatMoney(descuentoIVA)}
                         </span>
                       </div>
