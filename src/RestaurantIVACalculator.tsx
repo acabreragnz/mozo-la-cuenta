@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 
 // Componente reutilizable para secciones colapsables
@@ -53,6 +53,9 @@ export default function RestaurantIVACalculator() {
   const [tipoDescuento, setTipoDescuento] = useState("reembolso"); // 'reembolso' o 'factura'
   const [facturaAbierta, setFacturaAbierta] = useState(false);
   const [posAbierto, setPosAbierto] = useState(false);
+
+  // Ref para el campo de propina
+  const propinaInputRef = useRef<HTMLInputElement>(null);
 
   // Evaluar expresión matemática de forma segura
   const evaluarExpresion = (expr: string) => {
@@ -169,7 +172,8 @@ export default function RestaurantIVACalculator() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && expresionTieneOperador && montoNumerico > 0) {
                     e.preventDefault();
-                    setMontoExpresion(montoNumerico.toString());
+                    setMontoExpresion(montoNumerico.toFixed(2));
+                    propinaInputRef.current?.focus();
                   }
                 }}
                 placeholder="0.00 o 500+300"
@@ -221,6 +225,7 @@ export default function RestaurantIVACalculator() {
                 </span>
               )}
               <input
+                ref={propinaInputRef}
                 type="number"
                 value={
                   tipoPropina === "porcentaje" ? propinaPorcentaje : propinaFija
