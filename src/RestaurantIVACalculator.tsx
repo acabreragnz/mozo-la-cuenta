@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 
 // Componente reutilizable para secciones colapsables
@@ -53,6 +53,9 @@ export default function RestaurantIVACalculator() {
   const [tipoDescuento, setTipoDescuento] = useState("reembolso"); // 'reembolso' o 'factura'
   const [facturaAbierta, setFacturaAbierta] = useState(false);
   const [posAbierto, setPosAbierto] = useState(false);
+
+  // Ref para el campo de propina
+  const propinaInputRef = useRef<HTMLInputElement>(null);
 
   // Evaluar expresión matemática de forma segura
   const evaluarExpresion = (expr: string) => {
@@ -166,18 +169,32 @@ export default function RestaurantIVACalculator() {
                 inputMode="decimal"
                 value={montoExpresion}
                 onChange={(e) => setMontoExpresion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && expresionTieneOperador && montoNumerico > 0) {
+                    e.preventDefault();
+                    setMontoExpresion(montoNumerico.toFixed(2));
+                    propinaInputRef.current?.focus();
+                  }
+                }}
                 placeholder="0.00 o 500+300"
                 className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
             </div>
-            {expresionTieneOperador && montoNumerico > 0 && (
+            {expresionTieneOperador && (
               <p className="text-xs text-slate-400 mt-1">
                 = $ {formatMoney(montoNumerico)}
               </p>
             )}
-            <p className="text-xs text-slate-500 mt-1">
-              Podés sumar: 500+300 o restar: 1000-200
-            </p>
+            {montoExpresion.trim() !== "" && montoNumerico <= 0 && (
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                <span>⚠️</span> El monto debe ser mayor a cero
+              </p>
+            )}
+            {montoExpresion.trim() === "" && (
+              <p className="text-xs text-slate-500 mt-1">
+                Ejemplo: 500+300 o 1000-200
+              </p>
+            )}
           </div>
 
           <div>
@@ -215,6 +232,7 @@ export default function RestaurantIVACalculator() {
                 </span>
               )}
               <input
+                ref={propinaInputRef}
                 type="number"
                 value={
                   tipoPropina === "porcentaje" ? propinaPorcentaje : propinaFija
