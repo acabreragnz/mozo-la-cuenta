@@ -16,7 +16,7 @@ function Collapsible({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border overflow-hidden border-orange-500/30 bg-orange-950/20">
+    <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
       <button
         onClick={() => setAbierto(!abierto)}
         className="w-full flex items-center justify-between p-3 text-left"
@@ -140,10 +140,10 @@ export default function RestaurantIVACalculator() {
   const expresionTieneOperador = /[+\-*/]/.test(montoExpresion);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-orange-900 via-red-900 to-slate-900">
-      <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-orange-950/40 border-orange-500/20">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900">
+      <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-cyan-950/40 border-cyan-500/20">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 bg-orange-500/20 p-1">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 bg-cyan-950/40 p-1">
             <img src="/favicon.jpg" alt="Mozo, la cuenta!" className="w-full h-full rounded-xl" />
           </div>
           <h1 className="text-2xl font-bold text-white">Mozo, la cuenta!</h1>
@@ -167,7 +167,7 @@ export default function RestaurantIVACalculator() {
                 value={montoExpresion}
                 onChange={(e) => setMontoExpresion(e.target.value)}
                 placeholder="0.00 o 500+300"
-                className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-orange-500 focus:ring-orange-500/20"
+                className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
             </div>
             {expresionTieneOperador && montoNumerico > 0 && (
@@ -190,7 +190,7 @@ export default function RestaurantIVACalculator() {
                   onClick={() => setTipoPropina("porcentaje")}
                   className={`px-2 py-1 text-xs rounded-md transition-all ${
                     tipoPropina === "porcentaje"
-                      ? "bg-orange-500 text-white"
+                      ? "bg-cyan-500 text-white"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -200,7 +200,7 @@ export default function RestaurantIVACalculator() {
                   onClick={() => setTipoPropina("fija")}
                   className={`px-2 py-1 text-xs rounded-md transition-all ${
                     tipoPropina === "fija"
-                      ? "bg-orange-500 text-white"
+                      ? "bg-cyan-500 text-white"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -225,7 +225,7 @@ export default function RestaurantIVACalculator() {
                     : setPropinaFija(e.target.value)
                 }
                 placeholder={tipoPropina === "porcentaje" ? "10" : "0.00"}
-                className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all ${
+                className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all ${
                   tipoPropina === "fija" ? "pl-10 pr-4" : "pl-4 pr-10"
                 }`}
               />
@@ -255,7 +255,7 @@ export default function RestaurantIVACalculator() {
                 placeholder="9"
                 min="0"
                 max="22"
-                className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-orange-500 focus:ring-orange-500/20"
+                className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
                 %
@@ -279,7 +279,7 @@ export default function RestaurantIVACalculator() {
                 placeholder="0"
                 min="0"
                 max="100"
-                className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-orange-500 focus:ring-orange-500/20"
+                className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
                 %
@@ -296,7 +296,7 @@ export default function RestaurantIVACalculator() {
                     onClick={() => setTipoDescuento("reembolso")}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                       tipoDescuento === "reembolso"
-                        ? "bg-orange-500 text-white"
+                        ? "bg-cyan-500 text-white"
                         : "text-slate-400 hover:text-white"
                     }`}
                   >
@@ -306,7 +306,7 @@ export default function RestaurantIVACalculator() {
                     onClick={() => setTipoDescuento("factura")}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                       tipoDescuento === "factura"
-                        ? "bg-orange-500 text-white"
+                        ? "bg-cyan-500 text-white"
                         : "text-slate-400 hover:text-white"
                     }`}
                   >
@@ -328,7 +328,7 @@ export default function RestaurantIVACalculator() {
               >
                 <div
                   className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                    propinaEnDescuento ? "bg-orange-500" : "bg-white/20"
+                    propinaEnDescuento ? "bg-cyan-500" : "bg-white/20"
                   }`}
                 >
                   <div
@@ -427,33 +427,33 @@ export default function RestaurantIVACalculator() {
             {ivaReembolso > 0 && (
               <div className="flex justify-between items-center py-2 text-sm">
                 <div>
-                  <span className="text-orange-400">
+                  <span className="text-cyan-400">
                     Devolución IVA ({ivaReembolso}%)
                   </span>
                   <p className="text-xs text-slate-500">
                     Sobre gravado $ {formatMoney(montoGravado)}
                   </p>
                 </div>
-                <span className="text-orange-400">
+                <span className="text-cyan-400">
                   - $ {formatMoney(descuentoIVA)}
                 </span>
               </div>
             )}
 
-            <div className="rounded-2xl p-4 mt-3 bg-gradient-to-r from-orange-500 to-red-500">
+            <div className="rounded-2xl p-4 mt-3 bg-gradient-to-r from-cyan-500 to-sky-500">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-orange-100">Pagás</p>
+                  <p className="text-sm text-cyan-100">Pagás</p>
                   <p className="text-white text-2xl font-bold">
                     $ {formatMoney(precioFinal)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-orange-100">Ahorrás</p>
+                  <p className="text-sm text-cyan-100">Ahorrás</p>
                   <p className="text-white text-lg font-semibold">
                     $ {formatMoney(ahorroTotal)}
                   </p>
-                  <p className="text-xs text-orange-100">
+                  <p className="text-xs text-cyan-100">
                     ({porcentajeAhorro.toFixed(1)}%)
                   </p>
                 </div>
@@ -540,10 +540,10 @@ export default function RestaurantIVACalculator() {
                 )}
                 {ivaReembolso > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-orange-400">
+                    <span className="text-cyan-400">
                       Devolución IVA Ley 17.934
                     </span>
-                    <span className="text-orange-400">
+                    <span className="text-cyan-400">
                       - $ {formatMoney(descuentoIVA)}
                     </span>
                   </div>
