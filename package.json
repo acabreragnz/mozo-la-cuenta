@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Calculadora de descuento IVA para restaurantes en Uruguay",
+  "description": "Calculadora de descuentos para restaurantes en Uruguay - IVA y tarjetas de crédito",
   "author": "",
   "license": "MIT",
   "scripts": {

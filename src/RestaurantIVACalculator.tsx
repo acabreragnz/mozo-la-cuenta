@@ -10,10 +10,10 @@ export default function RestaurantIVACalculator() {
   const [propinaEnDescuento, setPropinaEnDescuento] = useState(true);
   const [tipoDescuento, setTipoDescuento] = useState('reembolso'); // 'reembolso' o 'factura'
   const [montoPOSManual, setMontoPOSManual] = useState('');
-  const [acordeonAbierto, setAcordeonAbierto] = useState(null); // 'factura' | 'pos' | null
+  const [acordeonAbierto, setAcordeonAbierto] = useState<'factura' | 'pos' | null>(null);
 
   // Evaluar expresión matemática de forma segura
-  const evaluarExpresion = (expr) => {
+  const evaluarExpresion = (expr: string) => {
     if (!expr || expr.trim() === '') return 0;
     try {
       // Solo permitir números, operadores básicos, paréntesis y puntos
@@ -64,27 +64,20 @@ export default function RestaurantIVACalculator() {
     ? baseDescuentoTarjeta * (descuentoPorcentaje / 100)
     : montoNumerico * (descuentoPorcentaje / 100);
   
-  const subtotalConDescuento = tipoDescuento === 'factura'
-    ? montoPOS + propinaNumerico
-    : montoPOS + propinaNumerico - montoDescuentoTarjeta;
-  
   // Base gravada: siempre sobre el monto efectivamente facturado (sin propina)
   // Si es descuento en factura, usar el monto del POS (puede ser redondeado)
   const montoParaIVA = tipoDescuento === 'factura' ? montoPOS : montoNumerico;
   const montoGravado = montoParaIVA / 1.22;
   const descuentoIVA = montoGravado * (ivaReembolso / 100);
   
-  // Total final en POS
-  const totalEnPOS = tipoDescuento === 'factura'
-    ? montoPOS + propinaNumerico - descuentoIVA
-    : subtotalConDescuento - descuentoIVA;
+  // Total final
   const precioFinal = tipoDescuento === 'factura'
     ? montoPOS + propinaNumerico - descuentoIVA
     : montoPOS + propinaNumerico - montoDescuentoTarjeta - descuentoIVA;
   const ahorroTotal = subtotal - precioFinal;
   const porcentajeAhorro = subtotal > 0 ? (ahorroTotal / subtotal) * 100 : 0;
 
-  const formatMoney = (value) => {
+  const formatMoney = (value: number) => {
     return value.toLocaleString('es-UY', { 
       minimumFractionDigits: 2, 
       maximumFractionDigits: 2 
@@ -101,9 +94,9 @@ export default function RestaurantIVACalculator() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3 bg-orange-500/20">
             <span className="text-3xl">🍽️</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Descuento IVA Restaurantes</h1>
+          <h1 className="text-2xl font-bold text-white">Calculadora Restaurantes</h1>
           <p className="text-slate-400 mt-1 text-sm">
-            Ley 17.934 - Uruguay
+            IVA + Descuentos de Tarjetas - Uruguay
           </p>
         </div>
 

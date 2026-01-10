@@ -1,13 +1,14 @@
-# 🍽️ Calculadora IVA Restaurantes Uruguay
+# 🍽️ Calculadora Restaurantes Uruguay
 
-Calculadora web para calcular el descuento de IVA en restaurantes según la Ley 17.934 de Uruguay.
+Calculadora web para calcular descuentos de IVA y tarjetas de crédito en restaurantes de Uruguay.
 
 ## 🚀 Características
 
-- ✨ Cálculo automático de devolución de IVA (9% sobre base gravada)
+- ✨ Cálculo automático de devolución de IVA (9% sobre base gravada - Ley 17.934)
 - 💳 Soporte para descuentos de tarjetas de crédito (reembolso o en factura)
 - 🧮 Calculadora de propina (porcentaje o monto fijo)
 - 📊 Desglose detallado de factura e-Ticket y voucher POS
+- 🔄 Soporte para ambos tipos de descuento (IVA + tarjeta)
 - 📱 Diseño responsive y moderno
 - ⚡ Soporte para expresiones matemáticas (ej: 500+300)
 
@@ -61,6 +62,10 @@ pnpm build
 
 MIT
 
-## 🇺🇾 Sobre la Ley 17.934
+## 🇺🇾 Sobre los Descuentos
 
+### Ley 17.934 - Devolución de IVA
 La Ley 17.934 de Uruguay permite la devolución del 9% del IVA en compras realizadas con tarjetas de débito en restaurantes y establecimientos gastronómicos.
+
+### Descuentos de Tarjetas
+Muchas tarjetas de crédito ofrecen descuentos adicionales en gastronomía (ej: Scotiabank 25%, Itaú 20%, etc.). Esta calculadora te ayuda a ver el precio final combinando ambos beneficios.
