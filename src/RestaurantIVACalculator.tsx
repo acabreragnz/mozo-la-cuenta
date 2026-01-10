@@ -166,6 +166,12 @@ export default function RestaurantIVACalculator() {
                 inputMode="decimal"
                 value={montoExpresion}
                 onChange={(e) => setMontoExpresion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && expresionTieneOperador && montoNumerico > 0) {
+                    e.preventDefault();
+                    setMontoExpresion(montoNumerico.toString());
+                  }
+                }}
                 placeholder="0.00 o 500+300"
                 className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
@@ -176,7 +182,7 @@ export default function RestaurantIVACalculator() {
               </p>
             )}
             <p className="text-xs text-slate-500 mt-1">
-              Podés sumar: 500+300 o restar: 1000-200
+              Ejemplo: 500+300 o 1000-200
             </p>
           </div>
 
