@@ -1,4 +1,5 @@
-import { useState, useMemo, ReactNode } from "react";
+import { useState, useMemo } from "react";
+import type { ReactNode } from "react";
 
 // Componente reutilizable para secciones colapsables
 function Collapsible({
