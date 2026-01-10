@@ -444,53 +444,59 @@ export default function RestaurantIVACalculator() {
                 </button>
 
                 {acordeonAbierto === "factura" && (
-                  <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Consumo</span>
-                      <span className="text-slate-300">
-                        $ {formatMoney(montoNumerico)}
-                      </span>
-                    </div>
-                    {tipoDescuento === "factura" && descuentoPorcentaje > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-blue-400">
-                          Descuento ({descuentoPorcentaje}%)
-                        </span>
-                        <span className="text-blue-400">
-                          - ${" "}
-                          {formatMoney(
-                            (montoNumerico * descuentoPorcentaje) / 100
-                          )}
-                        </span>
+                  <div className="p-3 pt-0">
+                    <div className="ticket-paper rounded mt-3">
+                      {/* Header */}
+                      <div className="ticket-header">
+                        <span className="ticket-logo">e-Ticket</span>
+                        <div className="ticket-small">PAGO: CONTADO | MONEDA: UYU</div>
                       </div>
-                    )}
-                    <div className="border-t border-white/10 pt-2 mt-2">
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">
-                          Subtotal gravado (22%)
-                        </span>
-                        <span className="text-slate-300">
-                          $ {formatMoney(montoGravado)}
-                        </span>
+
+                      {/* Section title */}
+                      <div className="ticket-section">CONSUMO FINAL</div>
+
+                      {/* Items table header */}
+                      <div className="ticket-row ticket-small" style={{ borderBottom: '1px solid #333', paddingBottom: '2px', marginBottom: '4px' }}>
+                        <span style={{ width: '35px' }}>Cant.</span>
+                        <span style={{ flex: 1 }}>Descripción</span>
+                        <span style={{ width: '70px', textAlign: 'right' }}>Total</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">IVA 22%</span>
-                        <span className="text-slate-300">
-                          $ {formatMoney(montoGravado * 0.22)}
-                        </span>
+
+                      {/* Items */}
+                      <div className="ticket-row">
+                        <span style={{ width: '35px' }}>1,00</span>
+                        <span style={{ flex: 1 }}>Consumo</span>
+                        <span style={{ width: '70px', textAlign: 'right' }}>${formatMoney(montoNumerico)}</span>
                       </div>
-                    </div>
-                    <div className="border-t border-white/10 pt-2 mt-2">
-                      <div className="flex justify-between font-semibold">
-                        <span className="text-white">Total facturado</span>
-                        <span className="text-white">
-                          ${" "}
-                          {formatMoney(
-                            tipoDescuento === "factura"
-                              ? montoPOS
-                              : montoNumerico
-                          )}
-                        </span>
+                      {tipoDescuento === "factura" && descuentoPorcentaje > 0 && (
+                        <div className="ticket-row">
+                          <span style={{ width: '35px' }}>1,00</span>
+                          <span style={{ flex: 1 }}>Descuento ({descuentoPorcentaje}%)</span>
+                          <span style={{ width: '70px', textAlign: 'right' }}>-${formatMoney((montoNumerico * descuentoPorcentaje) / 100)}</span>
+                        </div>
+                      )}
+
+                      {/* Separator */}
+                      <div className="ticket-separator"></div>
+
+                      {/* Totals */}
+                      <div className="ticket-row">
+                        <span>Subtotal grav. 22%:</span>
+                        <span>${formatMoney(montoGravado)}</span>
+                      </div>
+                      <div className="ticket-row">
+                        <span>IVA 22%:</span>
+                        <span>${formatMoney(montoGravado * 0.22)}</span>
+                      </div>
+                      <div className="ticket-row ticket-total" style={{ marginTop: '4px' }}>
+                        <span>TOTAL:</span>
+                        <span>${formatMoney(tipoDescuento === "factura" ? montoPOS : montoNumerico)}</span>
+                      </div>
+
+                      {/* Adenda section */}
+                      <div className="ticket-section" style={{ marginTop: '12px', marginBottom: '4px' }}>ADENDA</div>
+                      <div className="ticket-small" style={{ textAlign: 'center', color: '#666' }}>
+                        Documento generado por el sistema
                       </div>
                     </div>
                   </div>
@@ -518,40 +524,56 @@ export default function RestaurantIVACalculator() {
                 </button>
 
                 {acordeonAbierto === "pos" && (
-                  <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Monto base</span>
-                      <span className="text-slate-300">
-                        $ {formatMoney(montoPOS)}
-                      </span>
-                    </div>
-                    {propinaNumerico > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Propina</span>
-                        <span className="text-slate-300">
-                          $ {formatMoney(propinaNumerico)}
-                        </span>
+                  <div className="p-3 pt-0">
+                    <div className="voucher-paper rounded mt-3">
+                      {/* Header */}
+                      <div style={{ textAlign: 'right', marginBottom: '4px' }} className="ticket-small">
+                        {new Date().toLocaleDateString('es-UY')}
                       </div>
-                    )}
-                    {ivaReembolso > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-orange-400">
-                          Devolución IVA Ley 17.934
-                        </span>
-                        <span className="text-orange-400">
-                          - $ {formatMoney(descuentoIVA)}
-                        </span>
+                      <div className="voucher-brand">POS</div>
+                      <div className="voucher-subtitle">VENTA</div>
+                      <div className="ticket-small" style={{ textAlign: 'center', marginTop: '4px' }}>
+                        CREDITO - CHIP
                       </div>
-                    )}
-                    <div className="border-t border-white/10 pt-2 mt-2">
-                      <div className="flex justify-between font-semibold">
-                        <span className="text-white">Total pagado</span>
-                        <span className="text-white">
-                          ${" "}
-                          {formatMoney(
-                            montoPOS + propinaNumerico - descuentoIVA
-                          )}
-                        </span>
+
+                      {/* Separator */}
+                      <div className="ticket-separator"></div>
+
+                      {/* Transaction details */}
+                      <div className="voucher-row">
+                        <span>Importe:</span>
+                        <span>$ {formatMoney(montoPOS)}</span>
+                      </div>
+                      {ivaReembolso > 0 && (
+                        <div className="voucher-row" style={{ color: '#c65d00' }}>
+                          <span>Ley 17934:</span>
+                          <span>$ -{formatMoney(descuentoIVA)}</span>
+                        </div>
+                      )}
+                      {propinaNumerico > 0 && (
+                        <div className="voucher-row">
+                          <span>Propina:</span>
+                          <span>$ {formatMoney(propinaNumerico)}</span>
+                        </div>
+                      )}
+
+                      {/* Separator */}
+                      <div className="ticket-separator"></div>
+
+                      {/* Total */}
+                      <div className="voucher-total-box">
+                        <div>TOTAL: $ {formatMoney(montoPOS + propinaNumerico - descuentoIVA)}</div>
+                      </div>
+
+                      {/* Footer notes */}
+                      {ivaReembolso > 0 && (
+                        <div className="voucher-note">
+                          Aplica dev. IVA Ley 17934
+                        </div>
+                      )}
+                      <div className="ticket-separator" style={{ marginTop: '8px' }}></div>
+                      <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '10px', marginTop: '4px' }}>
+                        *** COPIA CLIENTE ***
                       </div>
                     </div>
                   </div>
