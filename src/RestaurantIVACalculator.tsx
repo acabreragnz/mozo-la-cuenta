@@ -181,18 +181,16 @@ export default function RestaurantIVACalculator() {
               />
             </div>
             {expresionTieneOperador && (
-              <>
-                <p className="text-xs text-slate-400 mt-1">
-                  = $ {formatMoney(montoNumerico)}
-                </p>
-                {montoNumerico <= 0 && (
-                  <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
-                    <span>⚠️</span> El monto debe ser mayor a cero
-                  </p>
-                )}
-              </>
+              <p className="text-xs text-slate-400 mt-1">
+                = $ {formatMoney(montoNumerico)}
+              </p>
             )}
-            {!expresionTieneOperador && (
+            {montoExpresion.trim() !== "" && montoNumerico <= 0 && (
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                <span>⚠️</span> El monto debe ser mayor a cero
+              </p>
+            )}
+            {montoExpresion.trim() === "" && (
               <p className="text-xs text-slate-500 mt-1">
                 Ejemplo: 500+300 o 1000-200
               </p>
