@@ -170,7 +170,7 @@ export default function RestaurantIVACalculator() {
                 value={montoExpresion}
                 onChange={(e) => setMontoExpresion(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && expresionTieneOperador && montoNumerico > 0) {
+                  if (e.key === "Enter" && montoNumerico > 0) {
                     e.preventDefault();
                     setMontoExpresion(montoNumerico.toFixed(2));
                     propinaInputRef.current?.focus();
