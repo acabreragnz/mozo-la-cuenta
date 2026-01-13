@@ -5,6 +5,10 @@ import { Parser } from "expr-eval";
 // Constants
 const STANDARD_VAT_RATE = 1.22;
 const VAT_PERCENTAGE = 0.22;
+const MAX_EXPRESSION_LENGTH = 200;
+
+// Create parser instance once at module level for performance
+const expressionParser = new Parser();
 
 // Reusable collapsible section component
 function Collapsible({
@@ -63,12 +67,15 @@ export default function RestaurantIVACalculator() {
   // Ref for tip input field
   const tipInputRef = useRef<HTMLInputElement>(null);
 
-  // Safe math expression evaluator using expr-eval
+  // Safe math expression evaluator using expr-eval with DoS prevention
   const evaluateExpression = (expr: string): number => {
     if (!expr || expr.trim() === "") return 0;
+
+    // DoS Prevention: Limit expression length
+    if (expr.length > MAX_EXPRESSION_LENGTH) return 0;
+
     try {
-      const parser = new Parser();
-      const result = parser.evaluate(expr);
+      const result = expressionParser.evaluate(expr);
       return isNaN(result) || !isFinite(result) ? 0 : result;
     } catch {
       return 0;
@@ -103,6 +110,17 @@ export default function RestaurantIVACalculator() {
 
   const handleTipPercentageChange = (value: string) => {
     setTipPercentage(validateNumericInput(value, 0, 100));
+  };
+
+  const handleFixedTipChange = (value: string) => {
+    // Allow empty string or validate numeric input (no upper limit for fixed tip)
+    if (value === "") {
+      setFixedTip("");
+      return;
+    }
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0) return;
+    setFixedTip(value);
   };
 
   // Calculations based on discount type
@@ -264,7 +282,7 @@ export default function RestaurantIVACalculator() {
                 onChange={(e) =>
                   tipType === "porcentaje"
                     ? handleTipPercentageChange(e.target.value)
-                    : setFixedTip(e.target.value)
+                    : handleFixedTipChange(e.target.value)
                 }
                 placeholder={tipType === "porcentaje" ? "10" : "0.00"}
                 className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all ${
