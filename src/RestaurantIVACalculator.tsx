@@ -1,39 +1,44 @@
 import { useState, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
+import { Parser } from "expr-eval";
 
-// Componente reutilizable para secciones colapsables
+// Constants
+const STANDARD_VAT_RATE = 1.22;
+const VAT_PERCENTAGE = 0.22;
+
+// Reusable collapsible section component
 function Collapsible({
-  abierto,
-  setAbierto,
-  icono,
-  titulo,
+  isOpen,
+  setIsOpen,
+  icon,
+  title,
   children,
 }: {
-  abierto: boolean;
-  setAbierto: (abierto: boolean) => void;
-  icono: string;
-  titulo: string;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  icon: string;
+  title: string;
   children: ReactNode;
 }) {
   return (
     <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
       <button
-        onClick={() => setAbierto(!abierto)}
+        onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-3 text-left"
       >
         <span className="flex items-center gap-2 text-sm font-medium text-white">
-          <span>{icono}</span> {titulo}
+          <span>{icon}</span> {title}
         </span>
         <span
           className={`text-slate-400 transition-transform duration-300 ${
-            abierto ? "rotate-180" : ""
+            isOpen ? "rotate-180" : ""
           }`}
         >
           ▼
         </span>
       </button>
 
-      {abierto && (
+      {isOpen && (
         <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
           {children}
         </div>
@@ -43,95 +48,113 @@ function Collapsible({
 }
 
 export default function RestaurantIVACalculator() {
-  const [montoExpresion, setMontoExpresion] = useState("");
-  const [propinaPorcentaje, setPropinaPorcentaje] = useState("10");
-  const [propinaFija, setPropinaFija] = useState("");
-  const [tipoPropina, setTipoPropina] = useState("porcentaje");
-  const [descuentoTarjeta, setDescuentoTarjeta] = useState("");
-  const [porcentajeIVA, setPorcentajeIVA] = useState("9");
-  const [propinaEnDescuento, setPropinaEnDescuento] = useState(true);
-  const [tipoDescuento, setTipoDescuento] = useState("reembolso"); // 'reembolso' o 'factura'
-  const [facturaAbierta, setFacturaAbierta] = useState(false);
-  const [posAbierto, setPosAbierto] = useState(false);
+  const [amountExpression, setAmountExpression] = useState("");
+  const [tipPercentage, setTipPercentage] = useState("10");
+  const [fixedTip, setFixedTip] = useState("");
+  const [tipType, setTipType] = useState("porcentaje");
+  const [cardDiscount, setCardDiscount] = useState("");
+  const [vatPercentage, setVatPercentage] = useState("9");
+  const [includeTipInDiscount, setIncludeTipInDiscount] = useState(true);
+  const [discountType, setDiscountType] = useState("reembolso"); // 'reembolso' o 'factura'
+  const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [posOpen, setPosOpen] = useState(false);
   const [showAdvancedVATSettings, setShowAdvancedVATSettings] = useState(false);
 
-  // Ref para el campo de propina
-  const propinaInputRef = useRef<HTMLInputElement>(null);
+  // Ref for tip input field
+  const tipInputRef = useRef<HTMLInputElement>(null);
 
-  // Evaluar expresión matemática de forma segura
-  const evaluarExpresion = (expr: string) => {
+  // Safe math expression evaluator using expr-eval
+  const evaluateExpression = (expr: string): number => {
     if (!expr || expr.trim() === "") return 0;
     try {
-      // Solo permitir números, operadores básicos, paréntesis y puntos
-      const sanitized = expr.replace(/[^0-9+\-*/.() ]/g, "");
-      if (!sanitized) return 0;
-
-      // Evaluar de forma segura usando Function
-      const result = new Function(`return ${sanitized}`)();
+      const parser = new Parser();
+      const result = parser.evaluate(expr);
       return isNaN(result) || !isFinite(result) ? 0 : result;
     } catch {
       return 0;
     }
   };
 
-  const montoNumerico = useMemo(
-    () => evaluarExpresion(montoExpresion),
-    [montoExpresion]
+  const numericAmount = useMemo(
+    () => evaluateExpression(amountExpression),
+    [amountExpression]
   );
 
-  const descuentoPorcentaje = parseFloat(descuentoTarjeta) || 0;
-  const ivaReembolso = parseFloat(porcentajeIVA) || 0;
+  const discountPercentage = parseFloat(cardDiscount) || 0;
+  const vatRefund = parseFloat(vatPercentage) || 0;
 
-  // Cálculos según tipo de descuento
-  const montoDescontadoFactura =
-    tipoDescuento === "factura"
-      ? montoNumerico * (1 - descuentoPorcentaje / 100)
-      : montoNumerico;
+  // Input validation helper
+  const validateNumericInput = (value: string, min: number, max: number): string => {
+    const num = parseFloat(value);
+    if (isNaN(num)) return "";
+    if (num < min) return min.toString();
+    if (num > max) return max.toString();
+    return value;
+  };
 
-  // Monto en POS
-  const montoPOS = montoDescontadoFactura;
+  // Handlers with validation
+  const handleCardDiscountChange = (value: string) => {
+    setCardDiscount(validateNumericInput(value, 0, 100));
+  };
 
-  // Calcular propina sobre el monto del POS (no sobre el e-ticket)
-  const propinaNumerico = useMemo(() => {
-    // La propina siempre se calcula sobre el monto que va al POS
-    const basePropina = montoPOS;
+  const handleVatPercentageChange = (value: string) => {
+    setVatPercentage(validateNumericInput(value, 0, 22));
+  };
 
-    if (tipoPropina === "porcentaje") {
-      const pct = parseFloat(propinaPorcentaje) || 0;
-      return basePropina * (pct / 100);
+  const handleTipPercentageChange = (value: string) => {
+    setTipPercentage(validateNumericInput(value, 0, 100));
+  };
+
+  // Calculations based on discount type
+  const discountedInvoiceAmount =
+    discountType === "factura"
+      ? numericAmount * (1 - discountPercentage / 100)
+      : numericAmount;
+
+  // POS amount
+  const posAmount = discountedInvoiceAmount;
+
+  // Calculate tip on POS amount (not on e-ticket)
+  const numericTip = useMemo(() => {
+    // Tip is always calculated on POS amount
+    const tipBase = posAmount;
+
+    if (tipType === "porcentaje") {
+      const pct = parseFloat(tipPercentage) || 0;
+      return tipBase * (pct / 100);
     }
-    return parseFloat(propinaFija) || 0;
+    return parseFloat(fixedTip) || 0;
   }, [
-    tipoPropina,
-    propinaPorcentaje,
-    propinaFija,
-    montoNumerico,
-    tipoDescuento,
-    montoPOS,
+    tipType,
+    tipPercentage,
+    fixedTip,
+    numericAmount,
+    discountType,
+    posAmount,
   ]);
 
-  const subtotal = montoNumerico + propinaNumerico;
+  const subtotal = numericAmount + numericTip;
 
-  // Para reembolso, el descuento se calcula sobre subtotal o solo monto
-  const baseDescuentoTarjeta = propinaEnDescuento ? subtotal : montoNumerico;
-  const montoDescuentoTarjeta =
-    tipoDescuento === "reembolso"
-      ? baseDescuentoTarjeta * (descuentoPorcentaje / 100)
-      : montoNumerico * (descuentoPorcentaje / 100);
+  // For refund, discount is calculated on subtotal or amount only
+  const cardDiscountBase = includeTipInDiscount ? subtotal : numericAmount;
+  const cardDiscountAmount =
+    discountType === "reembolso"
+      ? cardDiscountBase * (discountPercentage / 100)
+      : numericAmount * (discountPercentage / 100);
 
-  // Base gravada: siempre sobre el monto efectivamente facturado (sin propina)
-  // Si es descuento en factura, usar el monto del POS (puede ser redondeado)
-  const montoParaIVA = tipoDescuento === "factura" ? montoPOS : montoNumerico;
-  const montoGravado = montoParaIVA / 1.22;
-  const descuentoIVA = montoGravado * (ivaReembolso / 100);
+  // Taxable base: always on actually invoiced amount (without tip)
+  // If discount is on invoice, use POS amount (may be rounded)
+  const amountForVAT = discountType === "factura" ? posAmount : numericAmount;
+  const taxableAmount = amountForVAT / STANDARD_VAT_RATE;
+  const vatDiscount = taxableAmount * (vatRefund / 100);
 
-  // Total final
-  const precioFinal =
-    tipoDescuento === "factura"
-      ? montoPOS + propinaNumerico - descuentoIVA
-      : montoPOS + propinaNumerico - montoDescuentoTarjeta - descuentoIVA;
-  const ahorroTotal = subtotal - precioFinal;
-  const porcentajeAhorro = subtotal > 0 ? (ahorroTotal / subtotal) * 100 : 0;
+  // Final total
+  const finalPrice =
+    discountType === "factura"
+      ? posAmount + numericTip - vatDiscount
+      : posAmount + numericTip - cardDiscountAmount - vatDiscount;
+  const totalSavings = subtotal - finalPrice;
+  const savingsPercentage = subtotal > 0 ? (totalSavings / subtotal) * 100 : 0;
 
   const formatMoney = (value: number) => {
     return value.toLocaleString("es-UY", {
@@ -140,8 +163,8 @@ export default function RestaurantIVACalculator() {
     });
   };
 
-  const hayResultados = montoNumerico > 0;
-  const expresionTieneOperador = /[+\-*/]/.test(montoExpresion);
+  const hasResults = numericAmount > 0;
+  const expressionHasOperator = /[+\-*/]/.test(amountExpression);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900">
@@ -168,30 +191,30 @@ export default function RestaurantIVACalculator() {
               <input
                 type="text"
                 inputMode="decimal"
-                value={montoExpresion}
-                onChange={(e) => setMontoExpresion(e.target.value)}
+                value={amountExpression}
+                onChange={(e) => setAmountExpression(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && montoNumerico > 0) {
+                  if (e.key === "Enter" && numericAmount > 0) {
                     e.preventDefault();
-                    setMontoExpresion(montoNumerico.toFixed(2));
-                    propinaInputRef.current?.focus();
+                    setAmountExpression(numericAmount.toFixed(2));
+                    tipInputRef.current?.focus();
                   }
                 }}
                 placeholder="500"
                 className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
             </div>
-            {expresionTieneOperador && (
+            {expressionHasOperator && (
               <p className="text-xs text-slate-400 mt-1">
-                = $ {formatMoney(montoNumerico)}
+                = $ {formatMoney(numericAmount)}
               </p>
             )}
-            {montoExpresion.trim() !== "" && montoNumerico <= 0 && (
+            {amountExpression.trim() !== "" && numericAmount <= 0 && (
               <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
                 <span>⚠️</span> El monto debe ser mayor a cero
               </p>
             )}
-            {montoExpresion.trim() === "" && (
+            {amountExpression.trim() === "" && (
               <p className="text-xs text-slate-500 mt-1">
                 Podés usar +, -, *, /
               </p>
@@ -205,9 +228,9 @@ export default function RestaurantIVACalculator() {
               </label>
               <div className="flex bg-white/10 rounded-lg p-0.5">
                 <button
-                  onClick={() => setTipoPropina("porcentaje")}
+                  onClick={() => setTipType("porcentaje")}
                   className={`px-2 py-1 text-xs rounded-md transition-all ${
-                    tipoPropina === "porcentaje"
+                    tipType === "porcentaje"
                       ? "bg-cyan-500 text-white"
                       : "text-slate-400 hover:text-white"
                   }`}
@@ -215,9 +238,9 @@ export default function RestaurantIVACalculator() {
                   %
                 </button>
                 <button
-                  onClick={() => setTipoPropina("fija")}
+                  onClick={() => setTipType("fija")}
                   className={`px-2 py-1 text-xs rounded-md transition-all ${
-                    tipoPropina === "fija"
+                    tipType === "fija"
                       ? "bg-cyan-500 text-white"
                       : "text-slate-400 hover:text-white"
                   }`}
@@ -227,36 +250,36 @@ export default function RestaurantIVACalculator() {
               </div>
             </div>
             <div className="relative">
-              {tipoPropina === "fija" && (
+              {tipType === "fija" && (
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
                   $
                 </span>
               )}
               <input
-                ref={propinaInputRef}
+                ref={tipInputRef}
                 type="number"
                 value={
-                  tipoPropina === "porcentaje" ? propinaPorcentaje : propinaFija
+                  tipType === "porcentaje" ? tipPercentage : fixedTip
                 }
                 onChange={(e) =>
-                  tipoPropina === "porcentaje"
-                    ? setPropinaPorcentaje(e.target.value)
-                    : setPropinaFija(e.target.value)
+                  tipType === "porcentaje"
+                    ? handleTipPercentageChange(e.target.value)
+                    : setFixedTip(e.target.value)
                 }
-                placeholder={tipoPropina === "porcentaje" ? "10" : "0.00"}
+                placeholder={tipType === "porcentaje" ? "10" : "0.00"}
                 className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all ${
-                  tipoPropina === "fija" ? "pl-10 pr-4" : "pl-4 pr-10"
+                  tipType === "fija" ? "pl-10 pr-4" : "pl-4 pr-10"
                 }`}
               />
-              {tipoPropina === "porcentaje" && (
+              {tipType === "porcentaje" && (
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
                   %
                 </span>
               )}
             </div>
-            {tipoPropina === "porcentaje" && propinaNumerico > 0 && (
+            {tipType === "porcentaje" && numericTip > 0 && (
               <p className="text-xs text-slate-400 mt-1">
-                = $ {formatMoney(propinaNumerico)}
+                = $ {formatMoney(numericTip)}
               </p>
             )}
             <p className="text-xs text-slate-500 mt-1">Sin devolución de IVA</p>
@@ -269,8 +292,8 @@ export default function RestaurantIVACalculator() {
             <div className="relative">
               <input
                 type="number"
-                value={descuentoTarjeta}
-                onChange={(e) => setDescuentoTarjeta(e.target.value)}
+                value={cardDiscount}
+                onChange={(e) => handleCardDiscountChange(e.target.value)}
                 placeholder="0"
                 min="0"
                 max="100"
@@ -284,13 +307,13 @@ export default function RestaurantIVACalculator() {
               Ej: Scotiabank 25%, Itaú 20%, etc.
             </p>
 
-            {descuentoPorcentaje > 0 && (
+            {discountPercentage > 0 && (
               <div className="mt-3 space-y-2">
                 <div className="flex bg-white/10 rounded-xl p-1">
                   <button
-                    onClick={() => setTipoDescuento("reembolso")}
+                    onClick={() => setDiscountType("reembolso")}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
-                      tipoDescuento === "reembolso"
+                      discountType === "reembolso"
                         ? "bg-cyan-500 text-white"
                         : "text-slate-400 hover:text-white"
                     }`}
@@ -298,9 +321,9 @@ export default function RestaurantIVACalculator() {
                     Reembolso
                   </button>
                   <button
-                    onClick={() => setTipoDescuento("factura")}
+                    onClick={() => setDiscountType("factura")}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
-                      tipoDescuento === "factura"
+                      discountType === "factura"
                         ? "bg-cyan-500 text-white"
                         : "text-slate-400 hover:text-white"
                     }`}
@@ -309,26 +332,26 @@ export default function RestaurantIVACalculator() {
                   </button>
                 </div>
                 <p className="text-xs text-slate-500">
-                  {tipoDescuento === "reembolso"
+                  {discountType === "reembolso"
                     ? "El descuento se devuelve después"
                     : "El descuento se aplica en la factura (propina sobre monto descontado)"}
                 </p>
               </div>
             )}
 
-            {tipoDescuento === "reembolso" && descuentoPorcentaje > 0 && (
+            {discountType === "reembolso" && discountPercentage > 0 && (
               <button
-                onClick={() => setPropinaEnDescuento(!propinaEnDescuento)}
+                onClick={() => setIncludeTipInDiscount(!includeTipInDiscount)}
                 className="flex items-center gap-3 mt-3 w-full"
               >
                 <div
                   className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                    propinaEnDescuento ? "bg-cyan-500" : "bg-white/20"
+                    includeTipInDiscount ? "bg-cyan-500" : "bg-white/20"
                   }`}
                 >
                   <div
                     className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
-                      propinaEnDescuento ? "left-6" : "left-1"
+                      includeTipInDiscount ? "left-6" : "left-1"
                     }`}
                   />
                 </div>
@@ -348,8 +371,8 @@ export default function RestaurantIVACalculator() {
                 <div className="relative">
                   <input
                     type="number"
-                    value={porcentajeIVA}
-                    onChange={(e) => setPorcentajeIVA(e.target.value)}
+                    value={vatPercentage}
+                    onChange={(e) => handleVatPercentageChange(e.target.value)}
                     placeholder="9"
                     min="0"
                     max="22"
@@ -365,7 +388,7 @@ export default function RestaurantIVACalculator() {
                   </p>
                   <button
                     onClick={() => {
-                      setPorcentajeIVA("9");
+                      setVatPercentage("9");
                       setShowAdvancedVATSettings(false);
                     }}
                     className="text-xs text-slate-400 hover:text-white transition-colors"
@@ -397,57 +420,57 @@ export default function RestaurantIVACalculator() {
           </div>
         </div>
 
-        {hayResultados && (
+        {hasResults && (
           <div className="space-y-2">
             <div className="flex justify-between items-center py-2 text-sm">
               <span className="text-slate-400">Cuenta</span>
               <span className="text-slate-300">
-                $ {formatMoney(montoNumerico)}
+                $ {formatMoney(numericAmount)}
               </span>
             </div>
 
-            {tipoDescuento === "factura" && descuentoPorcentaje > 0 && (
+            {discountType === "factura" && discountPercentage > 0 && (
               <>
                 <div className="flex justify-between items-center py-2 text-sm">
                   <span className="text-blue-400">
-                    Dto. en factura ({descuentoPorcentaje}%)
+                    Dto. en factura ({discountPercentage}%)
                   </span>
                   <span className="text-blue-400">
-                    - $ {formatMoney(montoDescuentoTarjeta)}
+                    - $ {formatMoney(cardDiscountAmount)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 text-sm border-b border-white/10">
                   <span className="text-slate-400">Subtotal factura</span>
                   <span className="text-slate-300">
-                    $ {formatMoney(montoDescontadoFactura)}
+                    $ {formatMoney(discountedInvoiceAmount)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 text-sm">
                   <span className="text-slate-400">Monto en POS</span>
                   <span className="text-slate-300">
-                    $ {formatMoney(montoPOS)}
+                    $ {formatMoney(posAmount)}
                   </span>
                 </div>
               </>
             )}
 
-            {propinaNumerico > 0 && (
+            {numericTip > 0 && (
               <div className="flex justify-between items-center py-2 text-sm">
                 <div>
                   <span className="text-slate-400">
                     Propina{" "}
-                    {tipoPropina === "porcentaje"
-                      ? `(${propinaPorcentaje}%)`
+                    {tipType === "porcentaje"
+                      ? `(${tipPercentage}%)`
                       : ""}
                   </span>
                 </div>
                 <span className="text-slate-300">
-                  $ {formatMoney(propinaNumerico)}
+                  $ {formatMoney(numericTip)}
                 </span>
               </div>
             )}
 
-            {tipoDescuento === "reembolso" && (
+            {discountType === "reembolso" && (
               <div className="flex justify-between items-center py-2 text-sm border-b border-white/10">
                 <span className="text-slate-400">Subtotal</span>
                 <span className="text-slate-300">
@@ -456,38 +479,38 @@ export default function RestaurantIVACalculator() {
               </div>
             )}
 
-            {tipoDescuento === "reembolso" && descuentoPorcentaje > 0 && (
+            {discountType === "reembolso" && discountPercentage > 0 && (
               <div className="flex justify-between items-center py-2 text-sm">
                 <div>
                   <span className="text-blue-400">
-                    Dto. tarjeta ({descuentoPorcentaje}%)
+                    Dto. tarjeta ({discountPercentage}%)
                   </span>
-                  {propinaNumerico > 0 && (
+                  {numericTip > 0 && (
                     <p className="text-xs text-slate-500">
-                      {propinaEnDescuento
+                      {includeTipInDiscount
                         ? "Sobre cuenta + propina"
                         : "Solo sobre cuenta"}
                     </p>
                   )}
                 </div>
                 <span className="text-blue-400">
-                  - $ {formatMoney(montoDescuentoTarjeta)}
+                  - $ {formatMoney(cardDiscountAmount)}
                 </span>
               </div>
             )}
 
-            {ivaReembolso > 0 && (
+            {vatRefund > 0 && (
               <div className="flex justify-between items-center py-2 text-sm">
                 <div>
                   <span className="text-cyan-400">
-                    Devolución IVA ({ivaReembolso}%)
+                    Devolución IVA ({vatRefund}%)
                   </span>
                   <p className="text-xs text-slate-500">
-                    Sobre gravado $ {formatMoney(montoGravado)}
+                    Sobre gravado $ {formatMoney(taxableAmount)}
                   </p>
                 </div>
                 <span className="text-cyan-400">
-                  - $ {formatMoney(descuentoIVA)}
+                  - $ {formatMoney(vatDiscount)}
                 </span>
               </div>
             )}
@@ -497,44 +520,44 @@ export default function RestaurantIVACalculator() {
                 <div>
                   <p className="text-sm text-cyan-100">Pagás</p>
                   <p className="text-white text-2xl font-bold">
-                    $ {formatMoney(precioFinal)}
+                    $ {formatMoney(finalPrice)}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-cyan-100">Ahorrás</p>
                   <p className="text-white text-lg font-semibold">
-                    $ {formatMoney(ahorroTotal)}
+                    $ {formatMoney(totalSavings)}
                   </p>
                   <p className="text-xs text-cyan-100">
-                    ({porcentajeAhorro.toFixed(1)}%)
+                    ({savingsPercentage.toFixed(1)}%)
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Acordeones de comprobantes */}
+            {/* Receipt accordions */}
             <div className="mt-4 space-y-2">
               <Collapsible
-                abierto={facturaAbierta}
-                setAbierto={setFacturaAbierta}
-                icono="📄"
-                titulo="Factura e-Ticket"
+                isOpen={invoiceOpen}
+                setIsOpen={setInvoiceOpen}
+                icon="📄"
+                title="Factura e-Ticket"
               >
                 <div className="flex justify-between">
                   <span className="text-slate-400">Consumo</span>
                   <span className="text-slate-300">
-                    $ {formatMoney(montoNumerico)}
+                    $ {formatMoney(numericAmount)}
                   </span>
                 </div>
-                {tipoDescuento === "factura" && descuentoPorcentaje > 0 && (
+                {discountType === "factura" && discountPercentage > 0 && (
                   <div className="flex justify-between">
                     <span className="text-blue-400">
-                      Descuento ({descuentoPorcentaje}%)
+                      Descuento ({discountPercentage}%)
                     </span>
                     <span className="text-blue-400">
                       - ${" "}
                       {formatMoney(
-                        (montoNumerico * descuentoPorcentaje) / 100
+                        (numericAmount * discountPercentage) / 100
                       )}
                     </span>
                   </div>
@@ -545,13 +568,13 @@ export default function RestaurantIVACalculator() {
                       Subtotal gravado (22%)
                     </span>
                     <span className="text-slate-300">
-                      $ {formatMoney(montoGravado)}
+                      $ {formatMoney(taxableAmount)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">IVA 22%</span>
                     <span className="text-slate-300">
-                      $ {formatMoney(montoGravado * 0.22)}
+                      $ {formatMoney(taxableAmount * VAT_PERCENTAGE)}
                     </span>
                   </div>
                 </div>
@@ -561,9 +584,9 @@ export default function RestaurantIVACalculator() {
                     <span className="text-white">
                       ${" "}
                       {formatMoney(
-                        tipoDescuento === "factura"
-                          ? montoPOS
-                          : montoNumerico
+                        discountType === "factura"
+                          ? posAmount
+                          : numericAmount
                       )}
                     </span>
                   </div>
@@ -571,32 +594,32 @@ export default function RestaurantIVACalculator() {
               </Collapsible>
 
               <Collapsible
-                abierto={posAbierto}
-                setAbierto={setPosAbierto}
-                icono="💳"
-                titulo="Voucher POS"
+                isOpen={posOpen}
+                setIsOpen={setPosOpen}
+                icon="💳"
+                title="Voucher POS"
               >
                 <div className="flex justify-between">
                   <span className="text-slate-400">Monto base</span>
                   <span className="text-slate-300">
-                    $ {formatMoney(montoPOS)}
+                    $ {formatMoney(posAmount)}
                   </span>
                 </div>
-                {propinaNumerico > 0 && (
+                {numericTip > 0 && (
                   <div className="flex justify-between">
                     <span className="text-slate-400">Propina</span>
                     <span className="text-slate-300">
-                      $ {formatMoney(propinaNumerico)}
+                      $ {formatMoney(numericTip)}
                     </span>
                   </div>
                 )}
-                {ivaReembolso > 0 && (
+                {vatRefund > 0 && (
                   <div className="flex justify-between">
                     <span className="text-cyan-400">
                       Devolución IVA Ley 17.934
                     </span>
                     <span className="text-cyan-400">
-                      - $ {formatMoney(descuentoIVA)}
+                      - $ {formatMoney(vatDiscount)}
                     </span>
                   </div>
                 )}
@@ -606,7 +629,7 @@ export default function RestaurantIVACalculator() {
                     <span className="text-white">
                       ${" "}
                       {formatMoney(
-                        montoPOS + propinaNumerico - descuentoIVA
+                        posAmount + numericTip - vatDiscount
                       )}
                     </span>
                   </div>
@@ -616,7 +639,7 @@ export default function RestaurantIVACalculator() {
           </div>
         )}
 
-        {!hayResultados && (
+        {!hasResults && (
           <div className="text-center py-6 text-slate-500">
             <p>Ingresá el monto para calcular</p>
           </div>
