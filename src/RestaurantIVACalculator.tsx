@@ -177,7 +177,7 @@ export default function RestaurantIVACalculator() {
                     propinaInputRef.current?.focus();
                   }
                 }}
-                placeholder="0.00 o 500+300"
+                placeholder="500"
                 className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
             </div>
@@ -193,7 +193,7 @@ export default function RestaurantIVACalculator() {
             )}
             {montoExpresion.trim() === "" && (
               <p className="text-xs text-slate-500 mt-1">
-                Ejemplo: 500+300 o 1000-200
+                Podés usar +, -, *, /
               </p>
             )}
           </div>
