@@ -53,6 +53,7 @@ export default function RestaurantIVACalculator() {
   const [tipoDescuento, setTipoDescuento] = useState("reembolso"); // 'reembolso' o 'factura'
   const [facturaAbierta, setFacturaAbierta] = useState(false);
   const [posAbierto, setPosAbierto] = useState(false);
+  const [showAdvancedVATSettings, setShowAdvancedVATSettings] = useState(false);
 
   // Ref para el campo de propina
   const propinaInputRef = useRef<HTMLInputElement>(null);
@@ -265,23 +266,57 @@ export default function RestaurantIVACalculator() {
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Devolución IVA
             </label>
-            <div className="relative">
-              <input
-                type="number"
-                value={porcentajeIVA}
-                onChange={(e) => setPorcentajeIVA(e.target.value)}
-                placeholder="9"
-                min="0"
-                max="22"
-                className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                %
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Ley 17.934: 9% en gastronomía
-            </p>
+            {showAdvancedVATSettings ? (
+              <div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={porcentajeIVA}
+                    onChange={(e) => setPorcentajeIVA(e.target.value)}
+                    placeholder="9"
+                    min="0"
+                    max="22"
+                    className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                    %
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-xs text-slate-500">
+                    Ley 17.934: 9% en gastronomía
+                  </p>
+                  <button
+                    onClick={() => {
+                      setPorcentajeIVA("9");
+                      setShowAdvancedVATSettings(false);
+                    }}
+                    className="text-xs text-slate-400 hover:text-white transition-colors"
+                  >
+                    Restablecer
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-semibold text-white">
+                      9% (Ley 17.934)
+                    </span>
+                    <button
+                      onClick={() => setShowAdvancedVATSettings(true)}
+                      className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
+                    >
+                      <span>⚙️</span> Ajustes avanzados
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Porcentaje estándar para restaurantes
+                </p>
+              </div>
+            )}
           </div>
 
           <div>
