@@ -667,7 +667,7 @@ export default function RestaurantIVACalculator() {
 
                   {vatRefund > 0 && (
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-cyan-400">Devolución IVA</span>
+                      <span className="text-cyan-400">Devolución IVA Ley 17.934</span>
                       <span className="text-cyan-400">
                         - $ {formatMoney(perPersonVatDiscount)}
                       </span>
