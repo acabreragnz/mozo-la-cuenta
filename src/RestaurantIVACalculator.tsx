@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
 import { Parser } from "expr-eval";
 
@@ -65,9 +65,24 @@ export default function RestaurantIVACalculator() {
   const [showAdvancedVATSettings, setShowAdvancedVATSettings] = useState(false);
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState("2");
+  const [splitMode, setSplitMode] = useState<'equal' | 'custom'>('equal');
+  const [personPercentages, setPersonPercentages] = useState<number[]>([50, 50]);
 
   // Ref for tip input field
   const tipInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize percentages when number of people changes or split mode changes to custom
+  useEffect(() => {
+    if (splitMode === 'custom') {
+      const numPeople = parseInt(numberOfPeople) || 2;
+      const equalPercent = 100 / numPeople;
+
+      // Only reset if the number of people changed
+      if (personPercentages.length !== numPeople) {
+        setPersonPercentages(Array(numPeople).fill(equalPercent));
+      }
+    }
+  }, [numberOfPeople, splitMode, personPercentages.length]);
 
   // Safe math expression evaluator using expr-eval with DoS prevention
   const evaluateExpression = (expr: string): number => {
@@ -142,6 +157,37 @@ export default function RestaurantIVACalculator() {
     setNumberOfPeople(value);
   };
 
+  // Handle percentage change for a specific person
+  const handlePercentageChange = (index: number, value: string) => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0) return;
+    if (num > 100) return;
+
+    const newPercentages = [...personPercentages];
+    newPercentages[index] = num;
+    setPersonPercentages(newPercentages);
+  };
+
+  // Auto-distribute remaining percentage
+  const distributeRemaining = () => {
+    const currentSum = personPercentages.reduce((a, b) => a + b, 0);
+    const remaining = 100 - currentSum;
+
+    if (Math.abs(remaining) < 0.01) return; // Already at 100%
+
+    // Distribute remaining among all people equally
+    const perPersonAdjustment = remaining / numPeople;
+    const newPercentages = personPercentages.map(p =>
+      Math.max(0, Math.min(100, p + perPersonAdjustment))
+    );
+
+    setPersonPercentages(newPercentages);
+  };
+
+  // Validation for percentage sum
+  const percentageSum = personPercentages.reduce((a, b) => a + b, 0);
+  const isValidSplit = Math.abs(percentageSum - 100) < 0.01;
+
   // Calculations based on discount type
   const discountedInvoiceAmount =
     discountType === "factura"
@@ -195,12 +241,43 @@ export default function RestaurantIVACalculator() {
 
   // Per-person calculations
   const numPeople = parseInt(numberOfPeople) || 2;
-  const perPersonAmount = numericAmount / numPeople;
-  const perPersonTip = numericTip / numPeople;
-  const perPersonCardDiscount = cardDiscountAmount / numPeople;
-  const perPersonVatDiscount = vatDiscount / numPeople;
-  const perPersonFinalPrice = finalPrice / numPeople;
-  const perPersonSavings = totalSavings / numPeople;
+
+  // Calculate per-person amounts based on split mode
+  const calculatePerPersonAmounts = () => {
+    if (splitMode === 'equal') {
+      return Array(numPeople).fill({
+        amount: numericAmount / numPeople,
+        tip: numericTip / numPeople,
+        cardDiscount: cardDiscountAmount / numPeople,
+        vatDiscount: vatDiscount / numPeople,
+        finalPrice: finalPrice / numPeople,
+        savings: totalSavings / numPeople,
+      });
+    } else {
+      // Custom mode: use percentages
+      return personPercentages.map((percentage) => {
+        const multiplier = percentage / 100;
+        return {
+          amount: numericAmount * multiplier,
+          tip: numericTip * multiplier,
+          cardDiscount: cardDiscountAmount * multiplier,
+          vatDiscount: vatDiscount * multiplier,
+          finalPrice: finalPrice * multiplier,
+          savings: totalSavings * multiplier,
+        };
+      });
+    }
+  };
+
+  const perPersonAmounts = calculatePerPersonAmounts();
+
+  // For equal mode, keep the old variables for backwards compatibility
+  const perPersonAmount = perPersonAmounts[0].amount;
+  const perPersonTip = perPersonAmounts[0].tip;
+  const perPersonCardDiscount = perPersonAmounts[0].cardDiscount;
+  const perPersonVatDiscount = perPersonAmounts[0].vatDiscount;
+  const perPersonFinalPrice = perPersonAmounts[0].finalPrice;
+  const perPersonSavings = perPersonAmounts[0].savings;
 
   const formatMoney = (value: number) => {
     return value.toLocaleString("es-UY", {
@@ -489,24 +566,123 @@ export default function RestaurantIVACalculator() {
             </div>
 
             {splitEnabled && (
-              <div>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                    👥
-                  </span>
-                  <input
-                    type="number"
-                    value={numberOfPeople}
-                    onChange={(e) => handleNumberOfPeopleChange(e.target.value)}
-                    placeholder="2"
-                    min="2"
-                    max="99"
-                    className="w-full pl-12 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
-                  />
+              <div className="space-y-3">
+                <div>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                      👥
+                    </span>
+                    <input
+                      type="number"
+                      value={numberOfPeople}
+                      onChange={(e) => handleNumberOfPeopleChange(e.target.value)}
+                      placeholder="2"
+                      min="2"
+                      max="99"
+                      className="w-full pl-12 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Número de personas (2-99)
+                  </p>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Número de personas (2-99)
-                </p>
+
+                {/* Split mode radio buttons */}
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setSplitMode('equal')}
+                    className="flex items-center gap-2 w-full text-left"
+                  >
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      splitMode === 'equal' ? 'border-cyan-500' : 'border-white/30'
+                    }`}>
+                      {splitMode === 'equal' && (
+                        <div className="w-2 h-2 rounded-full bg-cyan-500" />
+                      )}
+                    </div>
+                    <span className="text-sm text-slate-300">División igual</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSplitMode('custom')}
+                    className="flex items-center gap-2 w-full text-left"
+                  >
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      splitMode === 'custom' ? 'border-cyan-500' : 'border-white/30'
+                    }`}>
+                      {splitMode === 'custom' && (
+                        <div className="w-2 h-2 rounded-full bg-cyan-500" />
+                      )}
+                    </div>
+                    <span className="text-sm text-slate-300">División personalizada</span>
+                  </button>
+                </div>
+
+                {/* Custom percentage inputs */}
+                {splitMode === 'custom' && (
+                  <div className="space-y-2 rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-slate-300">
+                        Porcentaje por persona
+                      </span>
+                      <button
+                        onClick={distributeRemaining}
+                        className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                      >
+                        Distribuir resto
+                      </button>
+                    </div>
+
+                    {personPercentages.map((percentage, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400 w-20">
+                          Persona {index + 1}
+                        </span>
+                        <div className="relative flex-1">
+                          <input
+                            type="number"
+                            value={percentage}
+                            onChange={(e) => handlePercentageChange(index, e.target.value)}
+                            placeholder="0"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            className="w-full pl-3 pr-8 py-2 text-sm font-semibold bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
+                            %
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-400 w-20 text-right">
+                          $ {formatMoney(numericAmount * (percentage / 100))}
+                        </span>
+                      </div>
+                    ))}
+
+                    <div className="border-t border-white/10 pt-2 mt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-300">Total:</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-semibold ${
+                            isValidSplit ? 'text-green-400' : 'text-red-400'
+                          }`}>
+                            {percentageSum.toFixed(1)}%
+                          </span>
+                          {isValidSplit ? (
+                            <span className="text-green-400 text-xs">✓</span>
+                          ) : (
+                            <span className="text-red-400 text-xs">⚠️</span>
+                          )}
+                        </div>
+                      </div>
+                      {!isValidSplit && (
+                        <p className="text-xs text-red-400 mt-1">
+                          Los porcentajes deben sumar 100%
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -633,64 +809,140 @@ export default function RestaurantIVACalculator() {
                 <div className="px-4 py-3 bg-cyan-900/30 border-b border-cyan-500/20">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-white flex items-center gap-2">
-                      👥 Por persona ({numPeople} personas)
+                      👥 {splitMode === 'equal' ? 'Por persona' : 'División personalizada'} ({numPeople} personas)
                     </span>
                   </div>
                 </div>
-                <div className="px-4 py-3 space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-400">Cuenta</span>
-                    <span className="text-slate-300">
-                      $ {formatMoney(perPersonAmount)}
-                    </span>
-                  </div>
 
-                  {numericTip > 0 && (
+                {splitMode === 'equal' ? (
+                  // Equal split display
+                  <div className="px-4 py-3 space-y-2">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-400">Propina</span>
+                      <span className="text-slate-400">Cuenta</span>
                       <span className="text-slate-300">
-                        $ {formatMoney(perPersonTip)}
+                        $ {formatMoney(perPersonAmount)}
                       </span>
                     </div>
-                  )}
 
-                  {discountPercentage > 0 && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-blue-400">
-                        Dto. tarjeta
-                      </span>
-                      <span className="text-blue-400">
-                        - $ {formatMoney(perPersonCardDiscount)}
-                      </span>
-                    </div>
-                  )}
-
-                  {vatRefund > 0 && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-cyan-400">Devolución IVA Ley 17.934</span>
-                      <span className="text-cyan-400">
-                        - $ {formatMoney(perPersonVatDiscount)}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="border-t border-white/10 pt-2 mt-2">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-xs text-cyan-100">Paga cada uno</p>
-                        <p className="text-white text-xl font-bold">
-                          $ {formatMoney(perPersonFinalPrice)}
-                        </p>
+                    {numericTip > 0 && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-slate-400">Propina</span>
+                        <span className="text-slate-300">
+                          $ {formatMoney(perPersonTip)}
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-cyan-100">Ahorra cada uno</p>
-                        <p className="text-white text-base font-semibold">
-                          $ {formatMoney(perPersonSavings)}
-                        </p>
+                    )}
+
+                    {discountPercentage > 0 && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-blue-400">
+                          Dto. tarjeta
+                        </span>
+                        <span className="text-blue-400">
+                          - $ {formatMoney(perPersonCardDiscount)}
+                        </span>
+                      </div>
+                    )}
+
+                    {vatRefund > 0 && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-cyan-400">Devolución IVA Ley 17.934</span>
+                        <span className="text-cyan-400">
+                          - $ {formatMoney(perPersonVatDiscount)}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="border-t border-white/10 pt-2 mt-2">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-xs text-cyan-100">Paga cada uno</p>
+                          <p className="text-white text-xl font-bold">
+                            $ {formatMoney(perPersonFinalPrice)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-cyan-100">Ahorra cada uno</p>
+                          <p className="text-white text-base font-semibold">
+                            $ {formatMoney(perPersonSavings)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  // Custom split display - show each person
+                  <div className="px-4 py-3 space-y-3">
+                    {perPersonAmounts.map((amounts, index) => (
+                      <div key={index} className="rounded-lg border border-white/10 p-3 space-y-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-white">
+                            Persona {index + 1} ({personPercentages[index].toFixed(1)}%)
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-400">Cuenta</span>
+                          <span className="text-slate-300">
+                            $ {formatMoney(amounts.amount)}
+                          </span>
+                        </div>
+
+                        {numericTip > 0 && (
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-slate-400">Propina</span>
+                            <span className="text-slate-300">
+                              $ {formatMoney(amounts.tip)}
+                            </span>
+                          </div>
+                        )}
+
+                        {discountPercentage > 0 && (
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-blue-400">Dto. tarjeta</span>
+                            <span className="text-blue-400">
+                              - $ {formatMoney(amounts.cardDiscount)}
+                            </span>
+                          </div>
+                        )}
+
+                        {vatRefund > 0 && (
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-cyan-400">Devolución IVA</span>
+                            <span className="text-cyan-400">
+                              - $ {formatMoney(amounts.vatDiscount)}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="border-t border-white/10 pt-2 mt-2">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="text-xs text-cyan-100">Paga</p>
+                              <p className="text-white text-lg font-bold">
+                                $ {formatMoney(amounts.finalPrice)}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs text-cyan-100">Ahorra</p>
+                              <p className="text-white text-sm font-semibold">
+                                $ {formatMoney(amounts.savings)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {!isValidSplit && (
+                      <div className="text-center py-2">
+                        <p className="text-xs text-red-400">
+                          ⚠️ Los porcentajes deben sumar 100%
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
