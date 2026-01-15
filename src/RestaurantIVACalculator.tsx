@@ -67,6 +67,7 @@ export default function RestaurantIVACalculator() {
   const [numberOfPeople, setNumberOfPeople] = useState("2");
   const [splitMode, setSplitMode] = useState<'equal' | 'custom'>('equal');
   const [personPercentages, setPersonPercentages] = useState<number[]>([50, 50]);
+  const [lockedPeople, setLockedPeople] = useState<boolean[]>([false, false]);
 
   // Ref for tip input field
   const tipInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +81,7 @@ export default function RestaurantIVACalculator() {
       // Only reset if the number of people changed
       if (personPercentages.length !== numPeople) {
         setPersonPercentages(Array(numPeople).fill(equalPercent));
+        setLockedPeople(Array(numPeople).fill(false));
       }
     }
   }, [numberOfPeople, splitMode, personPercentages.length]);
@@ -168,6 +170,13 @@ export default function RestaurantIVACalculator() {
     setPersonPercentages(newPercentages);
   };
 
+  // Toggle lock state for a person
+  const toggleLock = (index: number) => {
+    const newLockedPeople = [...lockedPeople];
+    newLockedPeople[index] = !newLockedPeople[index];
+    setLockedPeople(newLockedPeople);
+  };
+
   // Auto-distribute remaining percentage
   const distributeRemaining = () => {
     const currentSum = personPercentages.reduce((a, b) => a + b, 0);
@@ -175,10 +184,15 @@ export default function RestaurantIVACalculator() {
 
     if (Math.abs(remaining) < 0.01) return; // Already at 100%
 
-    // Distribute remaining among all people equally
-    const perPersonAdjustment = remaining / numPeople;
-    const newPercentages = personPercentages.map(p =>
-      Math.max(0, Math.min(100, p + perPersonAdjustment))
+    // Count unlocked people
+    const unlockedCount = lockedPeople.filter(locked => !locked).length;
+
+    if (unlockedCount === 0) return; // All people are locked, can't distribute
+
+    // Distribute remaining among unlocked people only
+    const perPersonAdjustment = remaining / unlockedCount;
+    const newPercentages = personPercentages.map((p, i) =>
+      lockedPeople[i] ? p : Math.max(0, Math.min(100, p + perPersonAdjustment))
     );
 
     setPersonPercentages(newPercentages);
@@ -627,11 +641,18 @@ export default function RestaurantIVACalculator() {
                       </span>
                       <button
                         onClick={distributeRemaining}
-                        className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                        className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors disabled:text-slate-600 disabled:cursor-not-allowed"
+                        disabled={lockedPeople.every(locked => locked)}
+                        title={lockedPeople.every(locked => locked) ? 'Desbloquea al menos una persona para distribuir' : 'Distribuir resto entre personas desbloqueadas'}
                       >
                         Distribuir resto
                       </button>
                     </div>
+                    {lockedPeople.every(locked => locked) && (
+                      <p className="text-xs text-slate-500 mb-2">
+                        💡 Desbloquea al menos una persona para usar "Distribuir resto"
+                      </p>
+                    )}
 
                     {personPercentages.map((percentage, index) => (
                       <div key={index} className="flex items-center gap-2">
@@ -641,7 +662,7 @@ export default function RestaurantIVACalculator() {
                         <div className="relative flex-1">
                           <input
                             type="number"
-                            value={percentage}
+                            value={percentage.toFixed(2)}
                             onChange={(e) => handlePercentageChange(index, e.target.value)}
                             placeholder="0"
                             min="0"
@@ -653,6 +674,15 @@ export default function RestaurantIVACalculator() {
                             %
                           </span>
                         </div>
+                        <button
+                          onClick={() => toggleLock(index)}
+                          className={`text-lg transition-all ${
+                            lockedPeople[index] ? 'text-cyan-400 hover:text-cyan-300' : 'text-slate-600 hover:text-slate-400'
+                          }`}
+                          title={lockedPeople[index] ? 'Bloqueado (no se modificará al distribuir)' : 'Desbloqueado (se modificará al distribuir)'}
+                        >
+                          📌
+                        </button>
                         <span className="text-xs text-slate-400 w-20 text-right">
                           $ {formatMoney(numericAmount * (percentage / 100))}
                         </span>
