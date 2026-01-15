@@ -63,6 +63,8 @@ export default function RestaurantIVACalculator() {
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [posOpen, setPosOpen] = useState(false);
   const [showAdvancedVATSettings, setShowAdvancedVATSettings] = useState(false);
+  const [splitEnabled, setSplitEnabled] = useState(false);
+  const [numberOfPeople, setNumberOfPeople] = useState("2");
 
   // Ref for tip input field
   const tipInputRef = useRef<HTMLInputElement>(null);
@@ -123,6 +125,23 @@ export default function RestaurantIVACalculator() {
     setFixedTip(value);
   };
 
+  const handleNumberOfPeopleChange = (value: string) => {
+    if (value === "") {
+      setNumberOfPeople("");
+      return;
+    }
+    const num = parseInt(value);
+    if (isNaN(num) || num < 2) {
+      setNumberOfPeople("2");
+      return;
+    }
+    if (num > 99) {
+      setNumberOfPeople("99");
+      return;
+    }
+    setNumberOfPeople(value);
+  };
+
   // Calculations based on discount type
   const discountedInvoiceAmount =
     discountType === "factura"
@@ -173,6 +192,15 @@ export default function RestaurantIVACalculator() {
       : posAmount + numericTip - cardDiscountAmount - vatDiscount;
   const totalSavings = subtotal - finalPrice;
   const savingsPercentage = subtotal > 0 ? (totalSavings / subtotal) * 100 : 0;
+
+  // Per-person calculations
+  const numPeople = parseInt(numberOfPeople) || 2;
+  const perPersonAmount = numericAmount / numPeople;
+  const perPersonTip = numericTip / numPeople;
+  const perPersonCardDiscount = cardDiscountAmount / numPeople;
+  const perPersonVatDiscount = vatDiscount / numPeople;
+  const perPersonFinalPrice = finalPrice / numPeople;
+  const perPersonSavings = totalSavings / numPeople;
 
   const formatMoney = (value: number) => {
     return value.toLocaleString("es-UY", {
@@ -436,6 +464,52 @@ export default function RestaurantIVACalculator() {
               </div>
             )}
           </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-slate-300">
+                Dividir cuenta
+              </label>
+              <button
+                onClick={() => setSplitEnabled(!splitEnabled)}
+                className="flex items-center gap-2"
+              >
+                <div
+                  className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+                    splitEnabled ? "bg-cyan-500" : "bg-white/20"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
+                      splitEnabled ? "left-6" : "left-1"
+                    }`}
+                  />
+                </div>
+              </button>
+            </div>
+
+            {splitEnabled && (
+              <div>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                    👥
+                  </span>
+                  <input
+                    type="number"
+                    value={numberOfPeople}
+                    onChange={(e) => handleNumberOfPeopleChange(e.target.value)}
+                    placeholder="2"
+                    min="2"
+                    max="99"
+                    className="w-full pl-12 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Número de personas (2-99)
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {hasResults && (
@@ -552,6 +626,73 @@ export default function RestaurantIVACalculator() {
                 </div>
               </div>
             </div>
+
+            {/* Per-person split display */}
+            {splitEnabled && numPeople >= 2 && (
+              <div className="mt-3 rounded-2xl border border-cyan-500/30 bg-cyan-950/20 overflow-hidden">
+                <div className="px-4 py-3 bg-cyan-900/30 border-b border-cyan-500/20">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-white flex items-center gap-2">
+                      👥 Por persona ({numPeople} personas)
+                    </span>
+                  </div>
+                </div>
+                <div className="px-4 py-3 space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-400">Cuenta</span>
+                    <span className="text-slate-300">
+                      $ {formatMoney(perPersonAmount)}
+                    </span>
+                  </div>
+
+                  {numericTip > 0 && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-400">Propina</span>
+                      <span className="text-slate-300">
+                        $ {formatMoney(perPersonTip)}
+                      </span>
+                    </div>
+                  )}
+
+                  {discountPercentage > 0 && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-blue-400">
+                        Dto. tarjeta
+                      </span>
+                      <span className="text-blue-400">
+                        - $ {formatMoney(perPersonCardDiscount)}
+                      </span>
+                    </div>
+                  )}
+
+                  {vatRefund > 0 && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-cyan-400">Devolución IVA</span>
+                      <span className="text-cyan-400">
+                        - $ {formatMoney(perPersonVatDiscount)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="border-t border-white/10 pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-xs text-cyan-100">Paga cada uno</p>
+                        <p className="text-white text-xl font-bold">
+                          $ {formatMoney(perPersonFinalPrice)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-cyan-100">Ahorra cada uno</p>
+                        <p className="text-white text-base font-semibold">
+                          $ {formatMoney(perPersonSavings)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Receipt accordions */}
             <div className="mt-4 space-y-2">
