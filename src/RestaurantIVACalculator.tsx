@@ -214,19 +214,19 @@ export default function RestaurantIVACalculator() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900">
-      <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-cyan-950/40 border-cyan-500/20 animate-fade-in-up animate-duration-700">
+      <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-cyan-950/40 border-cyan-500/20 animate-fade-in-up animate-duration-300">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 bg-cyan-950/40 p-1 animate-bounce-in animate-delay-200">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 bg-cyan-950/40 p-1 animate-bounce-in animate-delay-100">
             <img src="/favicon.jpg" alt="Mozo, la cuenta!" className="w-full h-full rounded-xl" />
           </div>
-          <h1 className="text-2xl font-bold text-white animate-fade-in animate-delay-300">Mozo, la cuenta!</h1>
-          <p className="text-slate-400 mt-1 text-sm animate-fade-in animate-delay-500">
+          <h1 className="text-2xl font-bold text-white animate-fade-in animate-delay-150">Mozo, la cuenta!</h1>
+          <p className="text-slate-400 mt-1 text-sm animate-fade-in animate-delay-200">
             Calculá tu ahorro en restaurantes 🇺🇾
           </p>
         </div>
 
         <div className="space-y-4 mb-6">
-          <div className="animate-fade-in-right animate-delay-700">
+          <div className="animate-fade-in-right animate-delay-300">
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Total de la cuenta
             </label>
@@ -267,7 +267,7 @@ export default function RestaurantIVACalculator() {
             )}
           </div>
 
-          <div className="animate-fade-in-right animate-delay-[800ms]">
+          <div className="animate-fade-in-right animate-delay-[350ms]">
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-slate-300">
                 Propina
@@ -331,7 +331,7 @@ export default function RestaurantIVACalculator() {
             <p className="text-xs text-slate-500 mt-1">Sin devolución de IVA</p>
           </div>
 
-          <div className="animate-fade-in-right animate-delay-[900ms]">
+          <div className="animate-fade-in-right animate-delay-[400ms]">
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Descuento de tarjeta
             </label>
@@ -408,7 +408,7 @@ export default function RestaurantIVACalculator() {
             )}
           </div>
 
-          <div className="animate-fade-in-right animate-delay-[1000ms]">
+          <div className="animate-fade-in-right animate-delay-[450ms]">
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Devolución IVA
             </label>
@@ -465,7 +465,7 @@ export default function RestaurantIVACalculator() {
             )}
           </div>
 
-          <div className="animate-fade-in-right animate-delay-[1100ms]">
+          <div className="animate-fade-in-right animate-delay-[500ms]">
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-slate-300">
                 Dividir cuenta
@@ -799,12 +799,12 @@ export default function RestaurantIVACalculator() {
         )}
 
         {!hasResults && (
-          <div className="text-center py-6 text-slate-500 animate-fade-in animate-delay-1000">
+          <div className="text-center py-6 text-slate-500 animate-fade-in animate-delay-500">
             <p>Ingresá el monto para calcular</p>
           </div>
         )}
 
-        <p className="text-center text-xs text-slate-600 mt-4 animate-fade-in animate-delay-[1200ms]">
+        <p className="text-center text-xs text-slate-600 mt-4 animate-fade-in animate-delay-[550ms]">
           Devolución IVA acreditada automáticamente
         </p>
       </div>
