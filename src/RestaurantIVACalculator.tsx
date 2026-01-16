@@ -558,33 +558,33 @@ export default function RestaurantIVACalculator() {
                 {/* Personalizar propina - Solo visible cuando wantsTip = true */}
                 {wantsTip && (
                   <div>
-                    {/* Label y toggle alineados */}
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-slate-300">
-                        Personalizar propina
-                      </label>
-                      <div className="flex bg-white/10 rounded-lg p-0.5">
-                        <button
-                          onClick={() => handleTipTypeChange("porcentaje")}
-                          className={`px-2 py-1 text-xs rounded-md transition-all ${
-                            tipType === "porcentaje"
-                              ? "bg-cyan-500 text-white"
-                              : "text-slate-400 hover:text-white"
-                          }`}
-                        >
-                          %
-                        </button>
-                        <button
-                          onClick={() => handleTipTypeChange("fija")}
-                          className={`px-2 py-1 text-xs rounded-md transition-all ${
-                            tipType === "fija"
-                              ? "bg-cyan-500 text-white"
-                              : "text-slate-400 hover:text-white"
-                          }`}
-                        >
-                          $
-                        </button>
-                      </div>
+                    {/* Label */}
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      ¿Cómo querés calcular la propina?
+                    </label>
+
+                    {/* Botones grandes para seleccionar tipo */}
+                    <div className="flex gap-2 mb-3">
+                      <button
+                        onClick={() => handleTipTypeChange("porcentaje")}
+                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                          tipType === "porcentaje"
+                            ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
+                            : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                        }`}
+                      >
+                        En porcentaje (%)
+                      </button>
+                      <button
+                        onClick={() => handleTipTypeChange("fija")}
+                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                          tipType === "fija"
+                            ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
+                            : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                        }`}
+                      >
+                        Monto fijo ($)
+                      </button>
                     </div>
 
                     {/* Input field */}
