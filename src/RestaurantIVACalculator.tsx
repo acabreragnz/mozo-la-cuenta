@@ -1044,7 +1044,7 @@ export default function RestaurantIVACalculator() {
                 </svg>
               </button>
 
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center pr-12">
                 <div>
                   <p className="text-sm text-cyan-100">Pagás</p>
                   <p className="text-white text-2xl font-bold">
