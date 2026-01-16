@@ -25,13 +25,13 @@ function Collapsible({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20 animate-fade-in animate-duration-300">
+    <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-3 text-left hover:bg-cyan-500/10 transition-colors"
       >
         <span className="flex items-center gap-2 text-sm font-medium text-white">
-          <span className={isOpen ? "animate-bounce" : ""}>{icon}</span> {title}
+          {icon} {title}
         </span>
         <span
           className={`text-slate-400 transition-transform duration-300 ${
@@ -43,7 +43,7 @@ function Collapsible({
       </button>
 
       {isOpen && (
-        <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3 animate-fade-in-down animate-duration-300">
+        <div className="px-3 pb-3 space-y-2 text-sm border-t border-white/10 pt-3">
           {children}
         </div>
       )}
@@ -247,7 +247,7 @@ export default function RestaurantIVACalculator() {
                   }
                 }}
                 placeholder="500"
-                className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20 hover:border-cyan-400/40 focus:scale-[1.02]"
+                className="w-full pl-10 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
               />
             </div>
             {expressionHasOperator && (
@@ -275,9 +275,9 @@ export default function RestaurantIVACalculator() {
               <div className="flex bg-white/10 rounded-lg p-0.5">
                 <button
                   onClick={() => setTipType("porcentaje")}
-                  className={`px-2 py-1 text-xs rounded-md transition-all hover:scale-110 ${
+                  className={`px-2 py-1 text-xs rounded-md transition-all ${
                     tipType === "porcentaje"
-                      ? "bg-cyan-500 text-white animate-flip-down"
+                      ? "bg-cyan-500 text-white"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -285,9 +285,9 @@ export default function RestaurantIVACalculator() {
                 </button>
                 <button
                   onClick={() => setTipType("fija")}
-                  className={`px-2 py-1 text-xs rounded-md transition-all hover:scale-110 ${
+                  className={`px-2 py-1 text-xs rounded-md transition-all ${
                     tipType === "fija"
-                      ? "bg-cyan-500 text-white animate-flip-down"
+                      ? "bg-cyan-500 text-white"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -355,12 +355,12 @@ export default function RestaurantIVACalculator() {
 
             {discountPercentage > 0 && (
               <div className="mt-3 space-y-2">
-                <div className="flex bg-white/10 rounded-xl p-1 animate-fade-in">
+                <div className="flex bg-white/10 rounded-xl p-1">
                   <button
                     onClick={() => setDiscountType("reembolso")}
-                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all hover:scale-105 ${
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                       discountType === "reembolso"
-                        ? "bg-cyan-500 text-white animate-zoom-in"
+                        ? "bg-cyan-500 text-white"
                         : "text-slate-400 hover:text-white"
                     }`}
                   >
@@ -368,16 +368,16 @@ export default function RestaurantIVACalculator() {
                   </button>
                   <button
                     onClick={() => setDiscountType("factura")}
-                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all hover:scale-105 ${
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                       discountType === "factura"
-                        ? "bg-cyan-500 text-white animate-zoom-in"
+                        ? "bg-cyan-500 text-white"
                         : "text-slate-400 hover:text-white"
                     }`}
                   >
                     En factura
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 animate-fade-in animate-duration-300">
+                <p className="text-xs text-slate-500">
                   {discountType === "reembolso"
                     ? "El descuento se devuelve después"
                     : "El descuento se aplica en la factura (propina sobre monto descontado)"}
@@ -392,11 +392,11 @@ export default function RestaurantIVACalculator() {
               >
                 <div
                   className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                    includeTipInDiscount ? "bg-cyan-500 animate-pulse" : "bg-white/20"
+                    includeTipInDiscount ? "bg-cyan-500" : "bg-white/20"
                   }`}
                 >
                   <div
-                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 hover:scale-110 ${
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
                       includeTipInDiscount ? "left-6" : "left-1"
                     }`}
                   />
@@ -413,7 +413,7 @@ export default function RestaurantIVACalculator() {
               Devolución IVA
             </label>
             {showAdvancedVATSettings ? (
-              <div className="animate-fade-in-down animate-duration-300">
+              <div>
                 <div className="relative">
                   <input
                     type="number"
@@ -452,9 +452,9 @@ export default function RestaurantIVACalculator() {
                     </span>
                     <button
                       onClick={() => setShowAdvancedVATSettings(true)}
-                      className="text-xs text-cyan-400 hover:text-cyan-300 transition-all flex items-center gap-1 hover:scale-110 hover:animate-wiggle"
+                      className="text-xs text-cyan-400 hover:text-cyan-300 transition-all flex items-center gap-1"
                     >
-                      <span className="animate-spin-slow">⚙️</span> Ajustes avanzados
+                      ⚙️ Ajustes avanzados
                     </button>
                   </div>
                 </div>
@@ -476,11 +476,11 @@ export default function RestaurantIVACalculator() {
               >
                 <div
                   className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                    splitEnabled ? "bg-cyan-500 animate-pulse" : "bg-white/20"
+                    splitEnabled ? "bg-cyan-500" : "bg-white/20"
                   }`}
                 >
                   <div
-                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 hover:scale-110 ${
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
                       splitEnabled ? "left-6" : "left-1"
                     }`}
                   />
@@ -489,7 +489,7 @@ export default function RestaurantIVACalculator() {
             </div>
 
             {splitEnabled && (
-              <div className="animate-slide-in-right animate-duration-300">
+              <div>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
                     👥
@@ -513,7 +513,7 @@ export default function RestaurantIVACalculator() {
         </div>
 
         {hasResults && (
-          <div className="space-y-2 animate-fade-in-up animate-duration-500">
+          <div className="space-y-2 animate-fade-in animate-duration-500">
             <div className="flex justify-between items-center py-2 text-sm">
               <span className="text-slate-400">Cuenta</span>
               <span className="text-slate-300">
@@ -607,17 +607,17 @@ export default function RestaurantIVACalculator() {
               </div>
             )}
 
-            <div className="rounded-2xl p-4 mt-3 bg-gradient-to-r from-cyan-500 to-sky-500 animate-zoom-in animate-delay-300 hover:scale-105 transition-transform duration-300 cursor-default">
+            <div className="rounded-2xl p-4 mt-3 bg-gradient-to-r from-cyan-500 to-sky-500">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm text-cyan-100">Pagás</p>
-                  <p className="text-white text-2xl font-bold animate-pulse">
+                  <p className="text-white text-2xl font-bold">
                     $ {formatMoney(finalPrice)}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-cyan-100">Ahorrás</p>
-                  <p className="text-white text-lg font-semibold animate-bounce">
+                  <p className="text-white text-lg font-semibold">
                     $ {formatMoney(totalSavings)}
                   </p>
                   <p className="text-xs text-cyan-100">
@@ -629,7 +629,7 @@ export default function RestaurantIVACalculator() {
 
             {/* Per-person split display */}
             {splitEnabled && numPeople >= 2 && (
-              <div className="mt-3 rounded-2xl border border-cyan-500/30 bg-cyan-950/20 overflow-hidden animate-slide-in-left animate-duration-500">
+              <div className="mt-3 rounded-2xl border border-cyan-500/30 bg-cyan-950/20 overflow-hidden">
                 <div className="px-4 py-3 bg-cyan-900/30 border-b border-cyan-500/20">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-white flex items-center gap-2">
