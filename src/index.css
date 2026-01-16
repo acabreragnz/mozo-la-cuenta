@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tailwind-animations";
 
 /* Ocultar spinners en campos de tipo number */
 /* Para navegadores WebKit (Chrome, Safari, Edge) */
