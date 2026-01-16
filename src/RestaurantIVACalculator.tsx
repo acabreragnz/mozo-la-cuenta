@@ -28,10 +28,10 @@ function Collapsible({
     <div className="rounded-xl border overflow-hidden border-cyan-500/30 bg-cyan-950/20">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 text-left"
+        className="w-full flex items-center justify-between p-3 text-left hover:bg-cyan-500/10 transition-colors"
       >
         <span className="flex items-center gap-2 text-sm font-medium text-white">
-          <span>{icon}</span> {title}
+          {icon} {title}
         </span>
         <span
           className={`text-slate-400 transition-transform duration-300 ${
@@ -214,19 +214,19 @@ export default function RestaurantIVACalculator() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900">
-      <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-cyan-950/40 border-cyan-500/20">
+      <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-cyan-950/40 border-cyan-500/20 animate-fade-in-up animate-duration-300">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 bg-cyan-950/40 p-1">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 bg-cyan-950/40 p-1 animate-bounce-in animate-delay-100">
             <img src="/favicon.jpg" alt="Mozo, la cuenta!" className="w-full h-full rounded-xl" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Mozo, la cuenta!</h1>
-          <p className="text-slate-400 mt-1 text-sm">
+          <h1 className="text-2xl font-bold text-white animate-fade-in animate-delay-150">Mozo, la cuenta!</h1>
+          <p className="text-slate-400 mt-1 text-sm animate-fade-in animate-delay-200">
             Calculá tu ahorro en restaurantes 🇺🇾
           </p>
         </div>
 
         <div className="space-y-4 mb-6">
-          <div>
+          <div className="animate-fade-in-right animate-delay-300">
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Total de la cuenta
             </label>
@@ -256,7 +256,7 @@ export default function RestaurantIVACalculator() {
               </p>
             )}
             {amountExpression.trim() !== "" && numericAmount <= 0 && (
-              <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1 animate-shake">
                 <span>⚠️</span> El monto debe ser mayor a cero
               </p>
             )}
@@ -267,7 +267,7 @@ export default function RestaurantIVACalculator() {
             )}
           </div>
 
-          <div>
+          <div className="animate-fade-in-right animate-delay-[350ms]">
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-slate-300">
                 Propina
@@ -331,7 +331,7 @@ export default function RestaurantIVACalculator() {
             <p className="text-xs text-slate-500 mt-1">Sin devolución de IVA</p>
           </div>
 
-          <div>
+          <div className="animate-fade-in-right animate-delay-[400ms]">
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Descuento de tarjeta
             </label>
@@ -408,7 +408,7 @@ export default function RestaurantIVACalculator() {
             )}
           </div>
 
-          <div>
+          <div className="animate-fade-in-right animate-delay-[450ms]">
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Devolución IVA
             </label>
@@ -452,9 +452,9 @@ export default function RestaurantIVACalculator() {
                     </span>
                     <button
                       onClick={() => setShowAdvancedVATSettings(true)}
-                      className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
+                      className="text-xs text-cyan-400 hover:text-cyan-300 transition-all flex items-center gap-1"
                     >
-                      <span>⚙️</span> Ajustes avanzados
+                      ⚙️ Ajustes avanzados
                     </button>
                   </div>
                 </div>
@@ -465,7 +465,7 @@ export default function RestaurantIVACalculator() {
             )}
           </div>
 
-          <div>
+          <div className="animate-fade-in-right animate-delay-[500ms]">
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-slate-300">
                 Dividir cuenta
@@ -513,7 +513,7 @@ export default function RestaurantIVACalculator() {
         </div>
 
         {hasResults && (
-          <div className="space-y-2">
+          <div className="space-y-2 animate-fade-in animate-duration-500">
             <div className="flex justify-between items-center py-2 text-sm">
               <span className="text-slate-400">Cuenta</span>
               <span className="text-slate-300">
@@ -799,12 +799,12 @@ export default function RestaurantIVACalculator() {
         )}
 
         {!hasResults && (
-          <div className="text-center py-6 text-slate-500">
+          <div className="text-center py-6 text-slate-500 animate-fade-in animate-delay-500">
             <p>Ingresá el monto para calcular</p>
           </div>
         )}
 
-        <p className="text-center text-xs text-slate-600 mt-4">
+        <p className="text-center text-xs text-slate-600 mt-4 animate-fade-in animate-delay-[550ms]">
           Devolución IVA acreditada automáticamente
         </p>
       </div>
