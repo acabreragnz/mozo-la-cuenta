@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
 import { Parser } from "expr-eval";
 
@@ -58,16 +58,26 @@ export default function RestaurantIVACalculator() {
   const [tipType, setTipType] = useState("porcentaje");
   const [cardDiscount, setCardDiscount] = useState("");
   const [vatPercentage, setVatPercentage] = useState("9");
-  const [includeTipInDiscount, setIncludeTipInDiscount] = useState(true);
+  const [includeTipInDiscount, setIncludeTipInDiscount] = useState(false);
   const [discountType, setDiscountType] = useState("reembolso"); // 'reembolso' o 'factura'
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [posOpen, setPosOpen] = useState(false);
-  const [showAdvancedVATSettings, setShowAdvancedVATSettings] = useState(false);
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState("2");
+  const [showTipInDiscountTooltip, setShowTipInDiscountTooltip] =
+    useState(false);
+  const [showDiscountTypeTooltip, setShowDiscountTypeTooltip] =
+    useState(false);
 
-  // Ref for tip input field
+  // Refs for input fields
+  const amountInputRef = useRef<HTMLInputElement>(null);
   const tipInputRef = useRef<HTMLInputElement>(null);
+
+  // Autofocus on mount
+  useEffect(() => {
+    amountInputRef.current?.focus();
+  }, []);
 
   // Safe math expression evaluator using expr-eval with DoS prevention
   const evaluateExpression = (expr: string): number => {
@@ -212,6 +222,36 @@ export default function RestaurantIVACalculator() {
   const hasResults = numericAmount > 0;
   const expressionHasOperator = /[+\-*/]/.test(amountExpression);
 
+  // Componente inline para tooltips
+  const InfoTooltip = ({
+    show,
+    onToggle,
+    children,
+  }: {
+    show: boolean;
+    onToggle: () => void;
+    children: ReactNode;
+  }) => (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-4 h-4 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-xs flex items-center justify-center transition-colors"
+        aria-label="Más información"
+      >
+        ?
+      </button>
+      {show && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={onToggle} />
+          <div className="absolute left-0 top-6 z-20 w-72 p-3 rounded-lg bg-slate-800 border border-slate-600 shadow-xl">
+            {children}
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900">
       <div className="backdrop-blur-lg rounded-3xl shadow-2xl p-6 w-full max-w-md border bg-cyan-950/40 border-cyan-500/20 animate-fade-in-up animate-duration-300">
@@ -235,6 +275,7 @@ export default function RestaurantIVACalculator() {
                 $
               </span>
               <input
+                ref={amountInputRef}
                 type="text"
                 inputMode="decimal"
                 value={amountExpression}
@@ -328,7 +369,6 @@ export default function RestaurantIVACalculator() {
                 = $ {formatMoney(numericTip)}
               </p>
             )}
-            <p className="text-xs text-slate-500 mt-1">Sin devolución de IVA</p>
           </div>
 
           <div className="animate-fade-in-right animate-delay-[400ms]">
@@ -350,163 +390,338 @@ export default function RestaurantIVACalculator() {
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Ej: Scotiabank 25%, Itaú 20%, etc.
+              Ingresá el % que te ofrece tu banco
             </p>
 
             {discountPercentage > 0 && (
-              <div className="mt-3 space-y-2">
-                <div className="flex bg-white/10 rounded-xl p-1">
+              <div className="mt-3 rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3 space-y-3">
+                {/* Header con lenguaje cotidiano */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-white">
+                    💳 ¿Cuándo te descuentan?
+                  </span>
+                  <InfoTooltip
+                    show={showDiscountTypeTooltip}
+                    onToggle={() =>
+                      setShowDiscountTypeTooltip(!showDiscountTypeTooltip)
+                    }
+                  >
+                    <div className="space-y-2 text-xs">
+                      <div>
+                        <p className="font-medium text-slate-100">
+                          ✓ Me devuelven después:
+                        </p>
+                        <p className="text-slate-300 mt-1">
+                          Pagás el total ahora. Tu banco te devuelve el
+                          descuento después en tu estado de cuenta.
+                        </p>
+                        <p className="text-slate-400 mt-1 text-[11px]">
+                          Ejemplo: Cuenta $1000 con 20% → pagás $1000, te
+                          devuelven $200 en el estado de cuenta
+                        </p>
+                      </div>
+                      <div className="border-t border-slate-600 pt-2">
+                        <p className="font-medium text-slate-100">
+                          ✓ Ya está descontado en la cuenta:
+                        </p>
+                        <p className="text-slate-300 mt-1">
+                          Cuando te traen el POS para pagar, ya vas a pagar
+                          menos. El descuento ya está aplicado.
+                        </p>
+                        <p className="text-slate-400 mt-1 text-[11px]">
+                          Ejemplo: Cuenta $1000 con 20% → el POS muestra $800
+                        </p>
+                      </div>
+                    </div>
+                  </InfoTooltip>
+                </div>
+
+                {/* Radio-style option cards */}
+                <div className="space-y-2">
+                  {/* Opción 1: Reembolso (devuelven después) */}
                   <button
                     onClick={() => setDiscountType("reembolso")}
-                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
+                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                       discountType === "reembolso"
-                        ? "bg-cyan-500 text-white"
-                        : "text-slate-400 hover:text-white"
+                        ? "border-cyan-500 bg-cyan-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
                     }`}
                   >
-                    Reembolso
+                    <div className="flex items-start gap-3">
+                      {/* Radio indicator */}
+                      <div
+                        className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          discountType === "reembolso"
+                            ? "border-cyan-500 bg-cyan-500"
+                            : "border-slate-400 bg-transparent"
+                        }`}
+                      >
+                        {discountType === "reembolso" && (
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        )}
+                      </div>
+
+                      {/* Text content */}
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-white">
+                          Me devuelven después
+                        </div>
+                        <div className="text-xs text-slate-200 mt-0.5">
+                          Pagás todo ahora. Tu banco te devuelve el descuento después
+                        </div>
+                      </div>
+                    </div>
                   </button>
+
+                  {/* Opción 2: En factura (ya descontado) */}
                   <button
                     onClick={() => setDiscountType("factura")}
-                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
+                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                       discountType === "factura"
-                        ? "bg-cyan-500 text-white"
-                        : "text-slate-400 hover:text-white"
+                        ? "border-cyan-500 bg-cyan-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
                     }`}
                   >
-                    En factura
+                    <div className="flex items-start gap-3">
+                      {/* Radio indicator */}
+                      <div
+                        className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          discountType === "factura"
+                            ? "border-cyan-500 bg-cyan-500"
+                            : "border-slate-400 bg-transparent"
+                        }`}
+                      >
+                        {discountType === "factura" && (
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        )}
+                      </div>
+
+                      {/* Text content */}
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-white">
+                          Ya está descontado en la cuenta
+                        </div>
+                        <div className="text-xs text-slate-200 mt-0.5">
+                          El restaurant ya aplicó el descuento en lo que te cobran
+                        </div>
+                      </div>
+                    </div>
                   </button>
                 </div>
-                <p className="text-xs text-slate-500">
-                  {discountType === "reembolso"
-                    ? "El descuento se devuelve después"
-                    : "El descuento se aplica en la factura (propina sobre monto descontado)"}
-                </p>
+
+                {/* Contexto adicional para opción "En factura" */}
+                {discountType === "factura" && (
+                  <div className="mt-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <p className="text-xs text-slate-100">
+                      💡 La propina se calcula sobre el monto ya descontado
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {discountType === "reembolso" && discountPercentage > 0 && (
-              <button
-                onClick={() => setIncludeTipInDiscount(!includeTipInDiscount)}
-                className="flex items-center gap-3 mt-3 w-full"
-              >
-                <div
-                  className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                    includeTipInDiscount ? "bg-cyan-500" : "bg-white/20"
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
-                      includeTipInDiscount ? "left-6" : "left-1"
-                    }`}
-                  />
-                </div>
-                <span className="text-xs text-slate-400">
-                  Incluir propina en el descuento
-                </span>
-              </button>
-            )}
-          </div>
+              <>
+                {/* Separador visual */}
+                <div className="mt-3 border-t border-white/10 pt-3" />
 
-          <div className="animate-fade-in-right animate-delay-[450ms]">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Devolución IVA
-            </label>
-            {showAdvancedVATSettings ? (
-              <div>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={vatPercentage}
-                    onChange={(e) => handleVatPercentageChange(e.target.value)}
-                    placeholder="9"
-                    min="0"
-                    max="22"
-                    className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                    %
-                  </span>
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <p className="text-xs text-slate-500">
-                    Ley 17.934: 9% en gastronomía
-                  </p>
-                  <button
-                    onClick={() => {
-                      setVatPercentage("9");
-                      setShowAdvancedVATSettings(false);
-                    }}
-                    className="text-xs text-slate-400 hover:text-white transition-colors"
-                  >
-                    Restablecer
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold text-white">
-                      9% (Ley 17.934)
-                    </span>
-                    <button
-                      onClick={() => setShowAdvancedVATSettings(true)}
-                      className="text-xs text-cyan-400 hover:text-cyan-300 transition-all flex items-center gap-1"
+                {/* Pregunta con elección explícita */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                      ¿Incluir propina en el descuento?
+                    </label>
+                    <InfoTooltip
+                      show={showTipInDiscountTooltip}
+                      onToggle={() =>
+                        setShowTipInDiscountTooltip(!showTipInDiscountTooltip)
+                      }
                     >
-                      ⚙️ Ajustes avanzados
+                      <div className="space-y-2 text-xs">
+                        <div>
+                          <p className="font-medium text-slate-100">
+                            ✓ Sí (incluir propina):
+                          </p>
+                          <p className="text-slate-300 mt-1">
+                            Tu descuento cubre la cuenta Y la propina.
+                          </p>
+                          <p className="text-slate-400 mt-1 text-[11px]">
+                            Ejemplo: si gastas $1000 + $100 de propina =
+                            descuento sobre $1100
+                          </p>
+                        </div>
+                        <div className="border-t border-slate-600 pt-2">
+                          <p className="font-medium text-slate-100">
+                            ✗ No (solo cuenta):
+                          </p>
+                          <p className="text-slate-300 mt-1">
+                            Tu descuento cubre SOLO la cuenta, no la propina.
+                          </p>
+                          <p className="text-slate-400 mt-1 text-[11px]">
+                            Ejemplo: si gastas $1000 + $100 de propina =
+                            descuento sobre $1000
+                          </p>
+                        </div>
+                      </div>
+                    </InfoTooltip>
+                  </div>
+
+                  {/* Botones Yes/No */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setIncludeTipInDiscount(false)}
+                      className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+                        !includeTipInDiscount
+                          ? "bg-cyan-500 text-white"
+                          : "bg-white/10 text-slate-400 hover:bg-white/15 hover:text-white"
+                      }`}
+                    >
+                      No
+                    </button>
+                    <button
+                      onClick={() => setIncludeTipInDiscount(true)}
+                      className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+                        includeTipInDiscount
+                          ? "bg-cyan-500 text-white"
+                          : "bg-white/10 text-slate-400 hover:bg-white/15 hover:text-white"
+                      }`}
+                    >
+                      Sí
                     </button>
                   </div>
+
+                  {/* Impacto en tiempo real */}
+                  <div className="rounded-lg bg-white/5 border border-white/10 p-2">
+                    <p className="text-xs text-slate-200">
+                      El descuento se calcula sobre:{" "}
+                      <span className="text-white font-medium">
+                        $ {formatMoney(cardDiscountBase)}
+                      </span>
+                      {!includeTipInDiscount && (
+                        <span className="text-slate-100">
+                          {" "}
+                          (solo la cuenta)
+                        </span>
+                      )}
+                    </p>
+                    {includeTipInDiscount && (
+                      <p className="text-xs text-slate-100 mt-1">
+                        Cuenta ($${formatMoney(numericAmount)}) + Propina ($
+                        ${formatMoney(numericTip)})
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Porcentaje estándar para restaurantes
-                </p>
-              </div>
+              </>
             )}
           </div>
 
-          <div className="animate-fade-in-right animate-delay-[500ms]">
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-slate-300">
-                Dividir cuenta
-              </label>
+          {/* Ajustes Avanzados - Consolidado */}
+          <div className="animate-fade-in-right animate-delay-[450ms]">
+            {!showAdvancedSettings ? (
               <button
-                onClick={() => setSplitEnabled(!splitEnabled)}
-                className="flex items-center gap-2"
+                onClick={() => setShowAdvancedSettings(true)}
+                className="w-full py-3 px-4 rounded-xl border-2 border-cyan-500/30 bg-cyan-950/10 hover:bg-cyan-950/20 hover:border-cyan-500/50 transition-all text-cyan-400 hover:text-cyan-300 font-medium text-sm flex items-center justify-center gap-2"
               >
-                <div
-                  className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                    splitEnabled ? "bg-cyan-500" : "bg-white/20"
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
-                      splitEnabled ? "left-6" : "left-1"
-                    }`}
-                  />
-                </div>
+                <span>⚙️</span> Ajustes avanzados
               </button>
-            </div>
-
-            {splitEnabled && (
-              <div>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                    👥
-                  </span>
-                  <input
-                    type="number"
-                    value={numberOfPeople}
-                    onChange={(e) => handleNumberOfPeopleChange(e.target.value)}
-                    placeholder="2"
-                    min="2"
-                    max="99"
-                    className="w-full pl-12 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
-                  />
+            ) : (
+              <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <span>⚙️</span> Ajustes avanzados
+                  </h3>
+                  <button
+                    onClick={() => setShowAdvancedSettings(false)}
+                    className="text-xs text-slate-400 hover:text-white transition-colors"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Número de personas (2-99)
-                </p>
+
+                {/* IVA Section */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Devolución IVA (%)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={vatPercentage}
+                      onChange={(e) => handleVatPercentageChange(e.target.value)}
+                      placeholder="9"
+                      min="0"
+                      max="22"
+                      className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                      %
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-200 mt-1">
+                    Ley 17.934: 9% en gastronomía
+                  </p>
+                </div>
+
+                {/* Dividir cuenta Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                      Dividir cuenta
+                    </label>
+                    <button
+                      onClick={() => setSplitEnabled(!splitEnabled)}
+                      className="flex items-center gap-2"
+                    >
+                      <div
+                        className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+                          splitEnabled ? "bg-cyan-500" : "bg-white/20"
+                        }`}
+                      >
+                        <div
+                          className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
+                            splitEnabled ? "left-6" : "left-1"
+                          }`}
+                        />
+                      </div>
+                    </button>
+                  </div>
+
+                  {splitEnabled && (
+                    <div>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                          👥
+                        </span>
+                        <input
+                          type="number"
+                          value={numberOfPeople}
+                          onChange={(e) => handleNumberOfPeopleChange(e.target.value)}
+                          placeholder="2"
+                          min="2"
+                          max="99"
+                          className="w-full pl-12 pr-4 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-200 mt-1">
+                        Número de personas (2-99)
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Botón Restablecer todo */}
+                <button
+                  onClick={() => {
+                    setVatPercentage("9");
+                    setSplitEnabled(false);
+                    setNumberOfPeople("2");
+                  }}
+                  className="w-full py-2 px-4 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white transition-all text-sm"
+                >
+                  Restablecer todo
+                </button>
               </div>
             )}
           </div>
