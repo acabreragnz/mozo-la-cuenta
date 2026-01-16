@@ -51,11 +51,44 @@ function Collapsible({
   );
 }
 
+// Reusable info tooltip component
+function InfoTooltip({
+  show,
+  onToggle,
+  children,
+}: {
+  show: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-4 h-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 hover:border-white/30 text-slate-200 text-xs flex items-center justify-center transition-all"
+        aria-label="Más información"
+      >
+        ?
+      </button>
+      {show && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={onToggle} />
+          <div className="absolute left-0 top-6 z-20 w-72 p-3 rounded-lg bg-slate-900/95 backdrop-blur-md border border-slate-600/50 shadow-xl">
+            {children}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function RestaurantIVACalculator() {
   const [amountExpression, setAmountExpression] = useState("");
   const [tipPercentage, setTipPercentage] = useState("10");
   const [fixedTip, setFixedTip] = useState("");
   const [tipType, setTipType] = useState("porcentaje");
+  const [wantsTip, setWantsTip] = useState(true);
   const [cardDiscount, setCardDiscount] = useState("");
   const [vatPercentage, setVatPercentage] = useState("9");
   const [includeTipInDiscount, setIncludeTipInDiscount] = useState(false);
@@ -152,6 +185,35 @@ export default function RestaurantIVACalculator() {
     setNumberOfPeople(value);
   };
 
+  // Handler para cambiar tipo de propina con conversión automática
+  const handleTipTypeChange = (newType: "porcentaje" | "fija") => {
+    if (newType === tipType) return; // No hacer nada si es el mismo tipo
+
+    const baseAmount = discountType === "factura"
+      ? numericAmount * (1 - discountPercentage / 100)
+      : numericAmount;
+
+    if (baseAmount === 0) {
+      // Si no hay monto base, solo cambiar el tipo sin conversión
+      setTipType(newType);
+      return;
+    }
+
+    if (newType === "fija") {
+      // Cambiar de % a $: calcular el valor en pesos
+      const currentPercentage = parseFloat(tipPercentage) || 0;
+      const valueInPesos = baseAmount * (currentPercentage / 100);
+      setFixedTip(valueInPesos > 0 ? valueInPesos.toFixed(2) : "");
+    } else {
+      // Cambiar de $ a %: calcular el porcentaje
+      const currentFixed = parseFloat(fixedTip) || 0;
+      const percentage = (currentFixed / baseAmount) * 100;
+      setTipPercentage(percentage > 0 ? Math.min(100, Math.round(percentage)).toString() : "");
+    }
+
+    setTipType(newType);
+  };
+
   // Calculations based on discount type
   const discountedInvoiceAmount =
     discountType === "factura"
@@ -163,6 +225,8 @@ export default function RestaurantIVACalculator() {
 
   // Calculate tip on POS amount (not on e-ticket)
   const numericTip = useMemo(() => {
+    if (!wantsTip) return 0;
+
     // Tip is always calculated on POS amount
     const tipBase = posAmount;
 
@@ -172,11 +236,10 @@ export default function RestaurantIVACalculator() {
     }
     return parseFloat(fixedTip) || 0;
   }, [
+    wantsTip,
     tipType,
     tipPercentage,
     fixedTip,
-    numericAmount,
-    discountType,
     posAmount,
   ]);
 
@@ -221,36 +284,6 @@ export default function RestaurantIVACalculator() {
 
   const hasResults = numericAmount > 0;
   const expressionHasOperator = /[+\-*/]/.test(amountExpression);
-
-  // Componente inline para tooltips
-  const InfoTooltip = ({
-    show,
-    onToggle,
-    children,
-  }: {
-    show: boolean;
-    onToggle: () => void;
-    children: ReactNode;
-  }) => (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="w-4 h-4 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-xs flex items-center justify-center transition-colors"
-        aria-label="Más información"
-      >
-        ?
-      </button>
-      {show && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={onToggle} />
-          <div className="absolute left-0 top-6 z-20 w-72 p-3 rounded-lg bg-slate-800 border border-slate-600 shadow-xl">
-            {children}
-          </div>
-        </>
-      )}
-    </div>
-  );
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900">
@@ -309,64 +342,41 @@ export default function RestaurantIVACalculator() {
           </div>
 
           <div className="animate-fade-in-right animate-delay-[350ms]">
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-slate-300">
-                Propina
-              </label>
-              <div className="flex bg-white/10 rounded-lg p-0.5">
-                <button
-                  onClick={() => setTipType("porcentaje")}
-                  className={`px-2 py-1 text-xs rounded-md transition-all ${
-                    tipType === "porcentaje"
-                      ? "bg-cyan-500 text-white"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  %
-                </button>
-                <button
-                  onClick={() => setTipType("fija")}
-                  className={`px-2 py-1 text-xs rounded-md transition-all ${
-                    tipType === "fija"
-                      ? "bg-cyan-500 text-white"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  $
-                </button>
-              </div>
-            </div>
-            <div className="relative">
-              {tipType === "fija" && (
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                  $
-                </span>
-              )}
-              <input
-                ref={tipInputRef}
-                type="number"
-                value={
-                  tipType === "porcentaje" ? tipPercentage : fixedTip
-                }
-                onChange={(e) =>
-                  tipType === "porcentaje"
-                    ? handleTipPercentageChange(e.target.value)
-                    : handleFixedTipChange(e.target.value)
-                }
-                placeholder={tipType === "porcentaje" ? "10" : "0.00"}
-                className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all ${
-                  tipType === "fija" ? "pl-10 pr-4" : "pl-4 pr-10"
+            {/* Pregunta */}
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              ¿Desea agregar propina?
+            </label>
+
+            {/* Botones Sí/No */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setWantsTip(false)}
+                className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                  !wantsTip
+                    ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
+                    : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
                 }`}
-              />
-              {tipType === "porcentaje" && (
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                  %
-                </span>
-              )}
+              >
+                No
+              </button>
+              <button
+                onClick={() => setWantsTip(true)}
+                className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                  wantsTip
+                    ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
+                    : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                }`}
+              >
+                Sí
+              </button>
             </div>
-            {tipType === "porcentaje" && numericTip > 0 && (
-              <p className="text-xs text-slate-400 mt-1">
-                = $ {formatMoney(numericTip)}
+
+            {/* Hint cuando selecciona Sí */}
+            {wantsTip && (
+              <p className="text-xs text-slate-400 mt-2 animate-fade-in">
+                Propina {tipType === "porcentaje" ? `${tipPercentage}%` : `$${fixedTip || "0"}`} = ${" "}
+                {formatMoney(numericTip)}
+                <span className="text-slate-500"> · Cambialo en Ajustes avanzados</span>
               </p>
             )}
           </div>
@@ -409,7 +419,7 @@ export default function RestaurantIVACalculator() {
                     <div className="space-y-2 text-xs">
                       <div>
                         <p className="font-medium text-slate-100">
-                          ✓ Me devuelven después:
+                          ✓ Me descuentan en estado de cuenta:
                         </p>
                         <p className="text-slate-300 mt-1">
                           Pagás el total ahora. Tu banco te devuelve el
@@ -438,7 +448,7 @@ export default function RestaurantIVACalculator() {
 
                 {/* Radio-style option cards */}
                 <div className="space-y-2">
-                  {/* Opción 1: Reembolso (devuelven después) */}
+                  {/* Opción 1: Reembolso (descuento en estado de cuenta) */}
                   <button
                     onClick={() => setDiscountType("reembolso")}
                     className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
@@ -464,7 +474,7 @@ export default function RestaurantIVACalculator() {
                       {/* Text content */}
                       <div className="flex-1">
                         <div className="text-sm font-medium text-white">
-                          Me devuelven después
+                          Me descuentan en estado de cuenta
                         </div>
                         <div className="text-xs text-slate-200 mt-0.5">
                           Pagás todo ahora. Tu banco te devuelve el descuento después
@@ -508,111 +518,15 @@ export default function RestaurantIVACalculator() {
                     </div>
                   </button>
                 </div>
-
-                {/* Contexto adicional para opción "En factura" */}
-                {discountType === "factura" && (
-                  <div className="mt-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <p className="text-xs text-slate-100">
-                      💡 La propina se calcula sobre el monto ya descontado
-                    </p>
-                  </div>
-                )}
               </div>
             )}
 
-            {discountType === "reembolso" && discountPercentage > 0 && (
-              <>
-                {/* Separador visual */}
-                <div className="mt-3 border-t border-white/10 pt-3" />
-
-                {/* Pregunta con elección explícita */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <label className="block text-sm font-medium text-slate-300">
-                      ¿Incluir propina en el descuento?
-                    </label>
-                    <InfoTooltip
-                      show={showTipInDiscountTooltip}
-                      onToggle={() =>
-                        setShowTipInDiscountTooltip(!showTipInDiscountTooltip)
-                      }
-                    >
-                      <div className="space-y-2 text-xs">
-                        <div>
-                          <p className="font-medium text-slate-100">
-                            ✓ Sí (incluir propina):
-                          </p>
-                          <p className="text-slate-300 mt-1">
-                            Tu descuento cubre la cuenta Y la propina.
-                          </p>
-                          <p className="text-slate-400 mt-1 text-[11px]">
-                            Ejemplo: si gastas $1000 + $100 de propina =
-                            descuento sobre $1100
-                          </p>
-                        </div>
-                        <div className="border-t border-slate-600 pt-2">
-                          <p className="font-medium text-slate-100">
-                            ✗ No (solo cuenta):
-                          </p>
-                          <p className="text-slate-300 mt-1">
-                            Tu descuento cubre SOLO la cuenta, no la propina.
-                          </p>
-                          <p className="text-slate-400 mt-1 text-[11px]">
-                            Ejemplo: si gastas $1000 + $100 de propina =
-                            descuento sobre $1000
-                          </p>
-                        </div>
-                      </div>
-                    </InfoTooltip>
-                  </div>
-
-                  {/* Botones Yes/No */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setIncludeTipInDiscount(false)}
-                      className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
-                        !includeTipInDiscount
-                          ? "bg-cyan-500 text-white"
-                          : "bg-white/10 text-slate-400 hover:bg-white/15 hover:text-white"
-                      }`}
-                    >
-                      No
-                    </button>
-                    <button
-                      onClick={() => setIncludeTipInDiscount(true)}
-                      className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
-                        includeTipInDiscount
-                          ? "bg-cyan-500 text-white"
-                          : "bg-white/10 text-slate-400 hover:bg-white/15 hover:text-white"
-                      }`}
-                    >
-                      Sí
-                    </button>
-                  </div>
-
-                  {/* Impacto en tiempo real */}
-                  <div className="rounded-lg bg-white/5 border border-white/10 p-2">
-                    <p className="text-xs text-slate-200">
-                      El descuento se calcula sobre:{" "}
-                      <span className="text-white font-medium">
-                        $ {formatMoney(cardDiscountBase)}
-                      </span>
-                      {!includeTipInDiscount && (
-                        <span className="text-slate-100">
-                          {" "}
-                          (solo la cuenta)
-                        </span>
-                      )}
-                    </p>
-                    {includeTipInDiscount && (
-                      <p className="text-xs text-slate-100 mt-1">
-                        Cuenta ($${formatMoney(numericAmount)}) + Propina ($
-                        ${formatMoney(numericTip)})
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </>
+            {/* Hint informativo sobre propina */}
+            {wantsTip && discountType === "reembolso" && discountPercentage > 0 && (
+              <p className="text-xs text-slate-400 mt-2">
+                💡 La propina {includeTipInDiscount ? "está incluida" : "no está incluida"} en el descuento
+                <span className="text-slate-500"> · Podés cambiarlo en Ajustes avanzados</span>
+              </p>
             )}
           </div>
 
@@ -634,38 +548,171 @@ export default function RestaurantIVACalculator() {
                   </h3>
                   <button
                     onClick={() => setShowAdvancedSettings(false)}
-                    className="text-xs text-slate-400 hover:text-white transition-colors"
+                    className="w-8 h-8 flex items-center justify-center text-xl text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                    aria-label="Cerrar ajustes avanzados"
                   >
                     ✕
                   </button>
                 </div>
 
-                {/* IVA Section */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Devolución IVA (%)
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={vatPercentage}
-                      onChange={(e) => handleVatPercentageChange(e.target.value)}
-                      placeholder="9"
-                      min="0"
-                      max="22"
-                      className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                      %
-                    </span>
+                {/* Personalizar propina - Solo visible cuando wantsTip = true */}
+                {wantsTip && (
+                  <div>
+                    {/* Label y toggle alineados */}
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-slate-300">
+                        Personalizar propina
+                      </label>
+                      <div className="flex bg-white/10 rounded-lg p-0.5">
+                        <button
+                          onClick={() => handleTipTypeChange("porcentaje")}
+                          className={`px-2 py-1 text-xs rounded-md transition-all ${
+                            tipType === "porcentaje"
+                              ? "bg-cyan-500 text-white"
+                              : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          %
+                        </button>
+                        <button
+                          onClick={() => handleTipTypeChange("fija")}
+                          className={`px-2 py-1 text-xs rounded-md transition-all ${
+                            tipType === "fija"
+                              ? "bg-cyan-500 text-white"
+                              : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          $
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Input field */}
+                    <div className="relative">
+                      {tipType === "fija" && (
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                          $
+                        </span>
+                      )}
+                      <input
+                        ref={tipInputRef}
+                        type="number"
+                        value={tipType === "porcentaje" ? tipPercentage : fixedTip}
+                        onChange={(e) =>
+                          tipType === "porcentaje"
+                            ? handleTipPercentageChange(e.target.value)
+                            : handleFixedTipChange(e.target.value)
+                        }
+                        placeholder={tipType === "porcentaje" ? "10" : "0.00"}
+                        className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all ${
+                          tipType === "fija" ? "pl-10 pr-4" : "pl-4 pr-10"
+                        }`}
+                      />
+                      {tipType === "porcentaje" && (
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                          %
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Helper text */}
+                    <p className="text-xs text-slate-400 mt-1">
+                      {tipType === "porcentaje"
+                        ? `= $ ${formatMoney(numericTip)}`
+                        : `Propina fija en pesos`
+                      }
+                    </p>
                   </div>
-                  <p className="text-xs text-slate-200 mt-1">
-                    Ley 17.934: 9% en gastronomía
-                  </p>
-                </div>
+                )}
+
+                {/* Incluir propina en descuento - Solo visible para reembolso */}
+                {wantsTip && discountType === "reembolso" && discountPercentage > 0 && (
+                  <div className="border-t border-slate-700/50 pt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <label className="block text-sm font-medium text-slate-300">
+                        ¿Incluir propina en el descuento?
+                      </label>
+                      <InfoTooltip
+                        show={showTipInDiscountTooltip}
+                        onToggle={() =>
+                          setShowTipInDiscountTooltip(!showTipInDiscountTooltip)
+                        }
+                      >
+                        <div className="space-y-3 text-xs">
+                          <div>
+                            <p className="font-medium text-slate-100">
+                              ✓ Sí (incluir propina):
+                            </p>
+                            <p className="text-slate-300 mt-1">
+                              El descuento se calcula sobre la cuenta + la propina.
+                              Ahorrás más.
+                            </p>
+                            <p className="text-slate-400 mt-1 text-[11px]">
+                              Ejemplo: Cuenta $1000 + Propina $100 con 20% descuento
+                              = $220 de reembolso
+                            </p>
+                          </div>
+                          <div className="border-t border-slate-600 pt-2">
+                            <p className="font-medium text-slate-100">
+                              ✗ No (solo cuenta):
+                            </p>
+                            <p className="text-slate-300 mt-1">
+                              El descuento se calcula solo sobre la cuenta, sin la
+                              propina.
+                            </p>
+                            <p className="text-slate-400 mt-1 text-[11px]">
+                              Ejemplo: Cuenta $1000 con 20% descuento = $200 de
+                              reembolso (propina no cuenta)
+                            </p>
+                          </div>
+                        </div>
+                      </InfoTooltip>
+                    </div>
+
+                    {/* Botones No/Sí */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIncludeTipInDiscount(false)}
+                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                          !includeTipInDiscount
+                            ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
+                            : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                        }`}
+                      >
+                        No
+                      </button>
+                      <button
+                        onClick={() => setIncludeTipInDiscount(true)}
+                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                          includeTipInDiscount
+                            ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
+                            : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                        }`}
+                      >
+                        Sí
+                      </button>
+                    </div>
+
+                    {/* Panel informativo cuando selecciona "Sí" */}
+                    {includeTipInDiscount && (
+                      <div className="mt-3 p-3 rounded-lg bg-white/5 border border-white/10">
+                        <p className="text-xs font-medium text-slate-200">
+                          El descuento se calcula sobre:{" "}
+                          <span className="text-white font-semibold">
+                            $ {formatMoney(cardDiscountBase)}
+                          </span>
+                        </p>
+                        <p className="text-xs text-slate-100 mt-1">
+                          Cuenta (${formatMoney(numericAmount)}) + Propina ($
+                          {formatMoney(numericTip)})
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Dividir cuenta Section */}
-                <div>
+                <div className="border-t border-slate-700/50 pt-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-slate-300">
                       Dividir cuenta
@@ -711,12 +758,41 @@ export default function RestaurantIVACalculator() {
                   )}
                 </div>
 
+                {/* IVA Section */}
+                <div className="border-t border-slate-700/50 pt-4">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Devolución IVA (%)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={vatPercentage}
+                      onChange={(e) => handleVatPercentageChange(e.target.value)}
+                      placeholder="9"
+                      min="0"
+                      max="22"
+                      className="w-full pl-4 pr-10 py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:outline-none transition-all focus:border-cyan-500 focus:ring-cyan-500/20"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                      %
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-200 mt-1">
+                    Ley 17.934: 9% en gastronomía
+                  </p>
+                </div>
+
                 {/* Botón Restablecer todo */}
                 <button
                   onClick={() => {
                     setVatPercentage("9");
                     setSplitEnabled(false);
                     setNumberOfPeople("2");
+                    setIncludeTipInDiscount(false);
+                    setWantsTip(true);
+                    setTipPercentage("10");
+                    setFixedTip("");
+                    setTipType("porcentaje");
                   }}
                   className="w-full py-2 px-4 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white transition-all text-sm"
                 >
@@ -882,7 +958,7 @@ export default function RestaurantIVACalculator() {
 
                   {vatRefund > 0 && (
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-cyan-400">Devolución IVA Ley 17.934</span>
+                      <span className="text-cyan-400">Devolución IVA</span>
                       <span className="text-cyan-400">
                         - $ {formatMoney(perPersonVatDiscount)}
                       </span>
