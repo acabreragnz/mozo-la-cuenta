@@ -358,7 +358,7 @@ export default function RestaurantIVACalculator() {
       message += `✨ Ahorrás: $${formatMoney(totalSavings)} (${savingsPercentage.toFixed(1)}%)\n`;
     }
 
-    message += `\n_Calculado con mozo-la-cuenta.uy_`;
+    message += `\n_Calculado con mozo-la-cuenta.tonicabrera.dev_`;
 
     return message;
   };
