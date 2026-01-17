@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
 import { Parser } from "expr-eval";
 import clsx from "clsx";
+import NumberFlow from "@number-flow/react";
 
 // Constants
 const STANDARD_VAT_RATE = 1.22;
@@ -11,6 +12,31 @@ const MAX_ACCOUNT_AMOUNT = 100000; // Maximum allowed account amount
 
 // Create parser instance once at module level for performance
 const expressionParser = new Parser();
+
+// MoneyFlow wrapper component with default formatting for Uruguayan currency
+function MoneyFlow({
+  value,
+  decimals = 2,
+  prefix = "$ "
+}: {
+  value: number;
+  decimals?: number;
+  prefix?: string;
+}) {
+  return (
+    <>
+      {prefix}
+      <NumberFlow
+        value={value}
+        format={{
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }}
+        locales="es-UY"
+      />
+    </>
+  );
+}
 
 // Reusable collapsible section component
 function Collapsible({
@@ -434,7 +460,7 @@ export default function RestaurantIVACalculator() {
             </div>
             {expressionHasOperator && (
               <p className="text-xs text-slate-400 mt-1">
-                = $ {formatMoney(numericAmount)}
+                = <MoneyFlow value={numericAmount} />
               </p>
             )}
             {amountExpression.trim() !== "" && numericAmount <= 0 && (
@@ -491,8 +517,7 @@ export default function RestaurantIVACalculator() {
             {/* Hint cuando selecciona Sí */}
             {wantsTip && (
               <p className="text-xs text-slate-400 mt-2 animate-fade-in">
-                Propina {tipType === "porcentaje" ? `${tipPercentage}%` : `$${fixedTip || "0"}`} = ${" "}
-                {formatMoney(numericTip)}
+                Propina {tipType === "porcentaje" ? `${tipPercentage}%` : `$${fixedTip || "0"}`} = <MoneyFlow value={numericTip} />
                 <span className="text-slate-500"> · Cambialo en Ajustes avanzados</span>
               </p>
             )}
@@ -745,7 +770,7 @@ export default function RestaurantIVACalculator() {
                     {/* Helper text */}
                     <p className="text-xs text-slate-400 mt-1">
                       {tipType === "porcentaje"
-                        ? `= $ ${formatMoney(numericTip)}`
+                        ? <>= <MoneyFlow value={numericTip} /></>
                         : `Propina fija en pesos`
                       }
                     </p>
@@ -1042,16 +1067,16 @@ export default function RestaurantIVACalculator() {
                 <div>
                   <p className="text-sm text-cyan-100">Pagás</p>
                   <p className="text-white text-2xl font-bold">
-                    $ {formatMoney(finalPrice)}
+                    <MoneyFlow value={finalPrice} />
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-cyan-100">Ahorrás</p>
                   <p className="text-white text-lg font-semibold">
-                    $ {formatMoney(totalSavings)}
+                    <MoneyFlow value={totalSavings} />
                   </p>
                   <p className="text-xs text-cyan-100">
-                    ({savingsPercentage.toFixed(1)}%)
+                    (<MoneyFlow value={savingsPercentage} decimals={1} prefix="" />%)
                   </p>
                 </div>
               </div>
@@ -1109,13 +1134,13 @@ export default function RestaurantIVACalculator() {
                       <div>
                         <p className="text-xs text-cyan-100">Paga cada uno</p>
                         <p className="text-white text-xl font-bold">
-                          $ {formatMoney(perPersonFinalPrice)}
+                          <MoneyFlow value={perPersonFinalPrice} />
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-cyan-100">Ahorra cada uno</p>
                         <p className="text-white text-base font-semibold">
-                          $ {formatMoney(perPersonSavings)}
+                          <MoneyFlow value={perPersonSavings} />
                         </p>
                       </div>
                     </div>
