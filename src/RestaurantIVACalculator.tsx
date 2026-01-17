@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
 import { Parser } from "expr-eval";
 import clsx from "clsx";
+import { useLocalStorage } from "usehooks-ts";
 import NumberFlow from "@number-flow/react";
 
 // Constants
@@ -114,14 +115,14 @@ function InfoTooltip({
 
 export default function RestaurantIVACalculator() {
   const [amountExpression, setAmountExpression] = useState("");
-  const [tipPercentage, setTipPercentage] = useState("10");
-  const [fixedTip, setFixedTip] = useState("");
-  const [tipType, setTipType] = useState("porcentaje");
-  const [wantsTip, setWantsTip] = useState(true);
-  const [cardDiscount, setCardDiscount] = useState("");
+  const [tipPercentage, setTipPercentage] = useLocalStorage("tipPercentage", "10");
+  const [fixedTip, setFixedTip] = useLocalStorage("fixedTip", "");
+  const [tipType, setTipType] = useLocalStorage<"porcentaje" | "fija">("tipType", "porcentaje");
+  const [wantsTip, setWantsTip] = useLocalStorage("wantsTip", true);
+  const [cardDiscount, setCardDiscount] = useLocalStorage("cardDiscount", "");
   const [vatPercentage, setVatPercentage] = useState("9");
-  const [includeTipInDiscount, setIncludeTipInDiscount] = useState(false);
-  const [discountType, setDiscountType] = useState("reembolso"); // 'reembolso' o 'factura'
+  const [includeTipInDiscount, setIncludeTipInDiscount] = useLocalStorage("includeTipInDiscount", false);
+  const [discountType, setDiscountType] = useLocalStorage<"reembolso" | "factura">("discountType", "reembolso"); // 'reembolso' o 'factura'
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [splitEnabled, setSplitEnabled] = useState(false);
