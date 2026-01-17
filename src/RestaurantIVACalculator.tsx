@@ -355,9 +355,10 @@ export default function RestaurantIVACalculator() {
                 onClick={() => setWantsTip(false)}
                 className={clsx(
                   "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
-                  !wantsTip
-                    ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
-                    : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                  {
+                    "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300": !wantsTip,
+                    "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10": wantsTip
+                  }
                 )}
               >
                 No
@@ -366,9 +367,10 @@ export default function RestaurantIVACalculator() {
                 onClick={() => setWantsTip(true)}
                 className={clsx(
                   "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
-                  wantsTip
-                    ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
-                    : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                  {
+                    "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300": wantsTip,
+                    "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10": !wantsTip
+                  }
                 )}
               >
                 Sí
@@ -457,9 +459,10 @@ export default function RestaurantIVACalculator() {
                     onClick={() => setDiscountType("reembolso")}
                     className={clsx(
                       "w-full text-left p-3 rounded-lg border-2 transition-all",
-                      discountType === "reembolso"
-                        ? "border-cyan-500 bg-cyan-500/10"
-                        : "border-white/10 bg-white/5 hover:border-white/20"
+                      {
+                        "border-cyan-500 bg-cyan-500/10": discountType === "reembolso",
+                        "border-white/10 bg-white/5 hover:border-white/20": discountType !== "reembolso"
+                      }
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -467,9 +470,10 @@ export default function RestaurantIVACalculator() {
                       <div
                         className={clsx(
                           "mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                          discountType === "reembolso"
-                            ? "border-cyan-500 bg-cyan-500"
-                            : "border-slate-400 bg-transparent"
+                          {
+                            "border-cyan-500 bg-cyan-500": discountType === "reembolso",
+                            "border-slate-400 bg-transparent": discountType !== "reembolso"
+                          }
                         )}
                       >
                         {discountType === "reembolso" && (
@@ -491,9 +495,10 @@ export default function RestaurantIVACalculator() {
                     onClick={() => setDiscountType("factura")}
                     className={clsx(
                       "w-full text-left p-3 rounded-lg border-2 transition-all",
-                      discountType === "factura"
-                        ? "border-cyan-500 bg-cyan-500/10"
-                        : "border-white/10 bg-white/5 hover:border-white/20"
+                      {
+                        "border-cyan-500 bg-cyan-500/10": discountType === "factura",
+                        "border-white/10 bg-white/5 hover:border-white/20": discountType !== "factura"
+                      }
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -501,9 +506,10 @@ export default function RestaurantIVACalculator() {
                       <div
                         className={clsx(
                           "mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                          discountType === "factura"
-                            ? "border-cyan-500 bg-cyan-500"
-                            : "border-slate-400 bg-transparent"
+                          {
+                            "border-cyan-500 bg-cyan-500": discountType === "factura",
+                            "border-slate-400 bg-transparent": discountType !== "factura"
+                          }
                         )}
                       >
                         {discountType === "factura" && (
@@ -571,9 +577,10 @@ export default function RestaurantIVACalculator() {
                         onClick={() => handleTipTypeChange("porcentaje")}
                         className={clsx(
                           "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
-                          tipType === "porcentaje"
-                            ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
-                            : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                          {
+                            "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300": tipType === "porcentaje",
+                            "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10": tipType !== "porcentaje"
+                          }
                         )}
                       >
                         En porcentaje (%)
@@ -582,9 +589,10 @@ export default function RestaurantIVACalculator() {
                         onClick={() => handleTipTypeChange("fija")}
                         className={clsx(
                           "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
-                          tipType === "fija"
-                            ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
-                            : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                          {
+                            "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300": tipType === "fija",
+                            "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10": tipType !== "fija"
+                          }
                         )}
                       >
                         Monto fijo ($)
@@ -610,7 +618,10 @@ export default function RestaurantIVACalculator() {
                         placeholder={tipType === "porcentaje" ? "10" : "0.00"}
                         className={clsx(
                           "w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all",
-                          tipType === "fija" ? "pl-10 pr-4" : "pl-4 pr-10"
+                          {
+                            "pl-10 pr-4": tipType === "fija",
+                            "pl-4 pr-10": tipType === "porcentaje"
+                          }
                         )}
                       />
                       {tipType === "porcentaje" && (
@@ -680,9 +691,10 @@ export default function RestaurantIVACalculator() {
                         onClick={() => setIncludeTipInDiscount(false)}
                         className={clsx(
                           "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
-                          !includeTipInDiscount
-                            ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
-                            : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                          {
+                            "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300": !includeTipInDiscount,
+                            "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10": includeTipInDiscount
+                          }
                         )}
                       >
                         No
@@ -691,9 +703,10 @@ export default function RestaurantIVACalculator() {
                         onClick={() => setIncludeTipInDiscount(true)}
                         className={clsx(
                           "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
-                          includeTipInDiscount
-                            ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
-                            : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
+                          {
+                            "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300": includeTipInDiscount,
+                            "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10": !includeTipInDiscount
+                          }
                         )}
                       >
                         Sí
@@ -731,13 +744,19 @@ export default function RestaurantIVACalculator() {
                       <div
                         className={clsx(
                           "relative w-11 h-6 rounded-full transition-colors duration-300",
-                          splitEnabled ? "bg-cyan-500" : "bg-white/20"
+                          {
+                            "bg-cyan-500": splitEnabled,
+                            "bg-white/20": !splitEnabled
+                          }
                         )}
                       >
                         <div
                           className={clsx(
                             "absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300",
-                            splitEnabled ? "left-6" : "left-1"
+                            {
+                              "left-6": splitEnabled,
+                              "left-1": !splitEnabled
+                            }
                           )}
                         />
                       </div>
