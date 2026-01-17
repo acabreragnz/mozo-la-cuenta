@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@number-flow/react": "^0.5.10",
     "@tailwindcss/vite": "4.1.18",
     "clsx": "2.1.1",
     "expr-eval": "^2.0.2",
