@@ -7,6 +7,7 @@ import clsx from "clsx";
 const STANDARD_VAT_RATE = 1.22;
 const VAT_PERCENTAGE = 0.22;
 const MAX_EXPRESSION_LENGTH = 200;
+const MAX_ACCOUNT_AMOUNT = 100000; // Maximum allowed account amount
 
 // Create parser instance once at module level for performance
 const expressionParser = new Parser();
@@ -284,7 +285,7 @@ export default function RestaurantIVACalculator() {
     });
   };
 
-  const hasResults = numericAmount > 0;
+  const hasResults = numericAmount > 0 && numericAmount <= MAX_ACCOUNT_AMOUNT;
   const expressionHasOperator = /[+\-*/]/.test(amountExpression);
 
   return (
@@ -334,6 +335,11 @@ export default function RestaurantIVACalculator() {
             {amountExpression.trim() !== "" && numericAmount <= 0 && (
               <p className="text-xs text-red-400 mt-1 flex items-center gap-1 animate-shake">
                 <span>⚠️</span> El monto debe ser mayor a cero
+              </p>
+            )}
+            {amountExpression.trim() !== "" && numericAmount > MAX_ACCOUNT_AMOUNT && (
+              <p className="text-xs text-red-400 mt-1 flex items-center gap-1 animate-shake">
+                <span>⚠️</span> El monto no puede superar $ {formatMoney(MAX_ACCOUNT_AMOUNT)}
               </p>
             )}
             {amountExpression.trim() === "" && (
