@@ -1281,7 +1281,7 @@ export default function RestaurantIVACalculator() {
           </div>
         )}
 
-        <p className="text-center text-xs text-slate-600 mt-4 animate-fade-in animate-delay-[550ms]">
+        <p className="text-center text-xs text-slate-400 mt-4 animate-fade-in animate-delay-[550ms]">
           Hecho con 💙 por{" "}
           <a
             href="https://github.com/acabreragnz"
