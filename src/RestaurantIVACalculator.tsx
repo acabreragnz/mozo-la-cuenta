@@ -95,8 +95,7 @@ export default function RestaurantIVACalculator() {
   const [vatPercentage, setVatPercentage] = useState("9");
   const [includeTipInDiscount, setIncludeTipInDiscount] = useState(false);
   const [discountType, setDiscountType] = useState("reembolso"); // 'reembolso' o 'factura'
-  const [invoiceOpen, setInvoiceOpen] = useState(false);
-  const [posOpen, setPosOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState("2");
@@ -282,6 +281,112 @@ export default function RestaurantIVACalculator() {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+  };
+
+  // Generate WhatsApp message
+  const generateWhatsAppMessage = (): string => {
+    if (!hasResults) return "";
+
+    let message = "🍽️ *Mozo, la cuenta!*\n\n";
+
+    if (splitEnabled && numPeople >= 2) {
+      // Split mode: show total and per person
+      message += `👥 Total (${numPeople} personas):\n`;
+      message += `• Cuenta: $${formatMoney(numericAmount)}\n`;
+
+      if (numericTip > 0) {
+        const tipLabel = tipType === "porcentaje" ? `Propina (${tipPercentage}%)` : "Propina";
+        message += `• ${tipLabel}: $${formatMoney(numericTip)}\n`;
+      }
+
+      if (discountPercentage > 0) {
+        const discountLabel = discountType === "factura" ? "Dto. en factura" : "Dto. tarjeta";
+        message += `• ${discountLabel} (${discountPercentage}%): -$${formatMoney(cardDiscountAmount)}\n`;
+      }
+
+      if (vatRefund > 0) {
+        message += `• Devolución IVA (${vatRefund}%): -$${formatMoney(vatDiscount)}\n`;
+      }
+
+      message += `\n💰 *Total: $${formatMoney(finalPrice)}*\n`;
+      message += `✨ Ahorro: $${formatMoney(totalSavings)} (${savingsPercentage.toFixed(1)}%)\n`;
+
+      message += `\n💵 Por persona:\n`;
+      message += `• Cuenta: $${formatMoney(perPersonAmount)}\n`;
+
+      if (perPersonTip > 0) {
+        message += `• Propina: $${formatMoney(perPersonTip)}\n`;
+      }
+
+      if (perPersonCardDiscount > 0) {
+        const discountLabel = discountType === "factura" ? "Dto. factura" : "Dto. tarjeta";
+        message += `• ${discountLabel}: -$${formatMoney(perPersonCardDiscount)}\n`;
+      }
+
+      if (perPersonVatDiscount > 0) {
+        message += `• Devolución IVA: -$${formatMoney(perPersonVatDiscount)}\n`;
+      }
+
+      message += `\n💰 *Paga cada uno: $${formatMoney(perPersonFinalPrice)}*\n`;
+      message += `✨ Ahorra cada uno: $${formatMoney(perPersonSavings)}\n`;
+    } else {
+      // No split mode: simple breakdown
+      message += `📊 Desglose:\n`;
+      message += `• Cuenta: $${formatMoney(numericAmount)}\n`;
+
+      if (numericTip > 0) {
+        const tipLabel = tipType === "porcentaje" ? `Propina (${tipPercentage}%)` : "Propina";
+        message += `• ${tipLabel}: $${formatMoney(numericTip)}\n`;
+      }
+
+      if (discountPercentage > 0) {
+        const discountLabel = discountType === "factura" ? "Dto. en factura" : "Dto. tarjeta";
+        message += `• ${discountLabel} (${discountPercentage}%): -$${formatMoney(cardDiscountAmount)}\n`;
+
+        if (discountType === "reembolso" && numericTip > 0) {
+          const includeNote = includeTipInDiscount ? "con propina" : "sin propina";
+          message += `  (${includeNote})\n`;
+        }
+      }
+
+      if (vatRefund > 0) {
+        message += `• Devolución IVA (${vatRefund}%): -$${formatMoney(vatDiscount)}\n`;
+      }
+
+      message += `\n💰 *Total a pagar: $${formatMoney(finalPrice)}*\n`;
+      message += `✨ Ahorrás: $${formatMoney(totalSavings)} (${savingsPercentage.toFixed(1)}%)\n`;
+    }
+
+    message += `\n_Calculado con mozo-la-cuenta.tonicabrera.dev_`;
+
+    return message;
+  };
+
+  // Handle share/copy
+  const handleShare = async () => {
+    const message = generateWhatsAppMessage();
+
+    // Try Web Share API first (works on mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          text: message,
+        });
+        return;
+      } catch (err) {
+        // User cancelled or share failed, fall through to clipboard
+        if ((err as Error).name === "AbortError") return;
+      }
+    }
+
+    // Fallback to clipboard
+    try {
+      await navigator.clipboard.writeText(message);
+      alert("✅ Copiado al portapapeles! Ahora podés pegarlo en WhatsApp");
+    } catch (err) {
+      // Last resort: show message in alert for manual copy
+      alert(message);
+    }
   };
 
   const hasResults = numericAmount > 0;
@@ -1013,107 +1118,128 @@ export default function RestaurantIVACalculator() {
               </div>
             )}
 
-            {/* Receipt accordions */}
-            <div className="mt-4 space-y-2">
+            {/* Unified details accordion */}
+            <div className="mt-4">
               <Collapsible
-                isOpen={invoiceOpen}
-                setIsOpen={setInvoiceOpen}
-                icon="📄"
-                title="Factura e-Ticket"
+                isOpen={detailsOpen}
+                setIsOpen={setDetailsOpen}
+                icon="📋"
+                title="Detalle de factura y pago"
               >
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Consumo</span>
-                  <span className="text-slate-300">
-                    $ {formatMoney(numericAmount)}
-                  </span>
+                {/* Factura section - wrapped in card */}
+                <div className="mb-3 rounded-xl bg-white/5 border border-white/10 p-3">
+                  <h4 className="text-xs font-semibold text-cyan-400 mb-2 flex items-center gap-1">
+                    📄 Factura e-Ticket
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Consumo</span>
+                      <span className="text-slate-300">
+                        $ {formatMoney(numericAmount)}
+                      </span>
+                    </div>
+                    {discountType === "factura" && discountPercentage > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-blue-400">
+                          Descuento ({discountPercentage}%)
+                        </span>
+                        <span className="text-blue-400">
+                          - ${" "}
+                          {formatMoney(
+                            (numericAmount * discountPercentage) / 100
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    <div className="border-t border-white/10 pt-2 mt-2">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">
+                          Subtotal gravado (22%)
+                        </span>
+                        <span className="text-slate-300">
+                          $ {formatMoney(taxableAmount)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">IVA 22%</span>
+                        <span className="text-slate-300">
+                          $ {formatMoney(taxableAmount * VAT_PERCENTAGE)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="border-t border-white/10 pt-2 mt-2">
+                      <div className="flex justify-between font-semibold">
+                        <span className="text-white">Total facturado</span>
+                        <span className="text-white">
+                          ${" "}
+                          {formatMoney(
+                            discountType === "factura"
+                              ? posAmount
+                              : numericAmount
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                {discountType === "factura" && discountPercentage > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-blue-400">
-                      Descuento ({discountPercentage}%)
-                    </span>
-                    <span className="text-blue-400">
-                      - ${" "}
-                      {formatMoney(
-                        (numericAmount * discountPercentage) / 100
-                      )}
-                    </span>
-                  </div>
-                )}
-                <div className="border-t border-white/10 pt-2 mt-2">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">
-                      Subtotal gravado (22%)
-                    </span>
-                    <span className="text-slate-300">
-                      $ {formatMoney(taxableAmount)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">IVA 22%</span>
-                    <span className="text-slate-300">
-                      $ {formatMoney(taxableAmount * VAT_PERCENTAGE)}
-                    </span>
-                  </div>
-                </div>
-                <div className="border-t border-white/10 pt-2 mt-2">
-                  <div className="flex justify-between font-semibold">
-                    <span className="text-white">Total facturado</span>
-                    <span className="text-white">
-                      ${" "}
-                      {formatMoney(
-                        discountType === "factura"
-                          ? posAmount
-                          : numericAmount
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </Collapsible>
 
-              <Collapsible
-                isOpen={posOpen}
-                setIsOpen={setPosOpen}
-                icon="💳"
-                title="Voucher POS"
-              >
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Monto base</span>
-                  <span className="text-slate-300">
-                    $ {formatMoney(posAmount)}
-                  </span>
-                </div>
-                {numericTip > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Propina</span>
-                    <span className="text-slate-300">
-                      $ {formatMoney(numericTip)}
-                    </span>
-                  </div>
-                )}
-                {vatRefund > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-cyan-400">
-                      Devolución IVA Ley 17.934
-                    </span>
-                    <span className="text-cyan-400">
-                      - $ {formatMoney(vatDiscount)}
-                    </span>
-                  </div>
-                )}
-                <div className="border-t border-white/10 pt-2 mt-2">
-                  <div className="flex justify-between font-semibold">
-                    <span className="text-white">Total pagado</span>
-                    <span className="text-white">
-                      ${" "}
-                      {formatMoney(
-                        posAmount + numericTip - vatDiscount
-                      )}
-                    </span>
+                {/* POS section - wrapped in card */}
+                <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                  <h4 className="text-xs font-semibold text-cyan-400 mb-2 flex items-center gap-1">
+                    💳 Voucher POS
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Monto base</span>
+                      <span className="text-slate-300">
+                        $ {formatMoney(posAmount)}
+                      </span>
+                    </div>
+                    {numericTip > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Propina</span>
+                        <span className="text-slate-300">
+                          $ {formatMoney(numericTip)}
+                        </span>
+                      </div>
+                    )}
+                    {vatRefund > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-cyan-400">
+                          Devolución IVA Ley 17.934
+                        </span>
+                        <span className="text-cyan-400">
+                          - $ {formatMoney(vatDiscount)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="border-t border-white/10 pt-2 mt-2">
+                      <div className="flex justify-between font-semibold">
+                        <span className="text-white">Total pagado</span>
+                        <span className="text-white">
+                          ${" "}
+                          {formatMoney(
+                            posAmount + numericTip - vatDiscount
+                          )}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Collapsible>
             </div>
+
+            {/* WhatsApp button after accordion */}
+            <button
+              onClick={handleShare}
+              className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-green-600 bg-green-600/10 hover:bg-green-600/20 text-green-400 transition-all text-sm font-medium"
+              aria-label="Compartir por WhatsApp"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+              <span>Compartir por WhatsApp</span>
+            </button>
           </div>
         )}
 
