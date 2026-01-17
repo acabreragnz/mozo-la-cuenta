@@ -1282,7 +1282,15 @@ export default function RestaurantIVACalculator() {
         )}
 
         <p className="text-center text-xs text-slate-600 mt-4 animate-fade-in animate-delay-[550ms]">
-          Devolución IVA acreditada automáticamente
+          Hecho con 💙 por{" "}
+          <a
+            href="https://github.com/acabreragnz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-400 hover:text-cyan-300 transition-colors underline"
+          >
+            @acabreragnz
+          </a>
         </p>
       </div>
     </div>
