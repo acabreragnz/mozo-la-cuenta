@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
 import { Parser } from "expr-eval";
+import clsx from "clsx";
 
 // Constants
 const STANDARD_VAT_RATE = 1.22;
@@ -34,9 +35,10 @@ function Collapsible({
           {icon} {title}
         </span>
         <span
-          className={`text-slate-400 transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={clsx(
+            "text-slate-400 transition-transform duration-300",
+            isOpen && "rotate-180"
+          )}
         >
           ▼
         </span>
@@ -351,21 +353,23 @@ export default function RestaurantIVACalculator() {
             <div className="flex gap-2">
               <button
                 onClick={() => setWantsTip(false)}
-                className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                className={clsx(
+                  "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
                   !wantsTip
                     ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
                     : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
-                }`}
+                )}
               >
                 No
               </button>
               <button
                 onClick={() => setWantsTip(true)}
-                className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                className={clsx(
+                  "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
                   wantsTip
                     ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
                     : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
-                }`}
+                )}
               >
                 Sí
               </button>
@@ -451,20 +455,22 @@ export default function RestaurantIVACalculator() {
                   {/* Opción 1: Reembolso (descuento en estado de cuenta) */}
                   <button
                     onClick={() => setDiscountType("reembolso")}
-                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                    className={clsx(
+                      "w-full text-left p-3 rounded-lg border-2 transition-all",
                       discountType === "reembolso"
                         ? "border-cyan-500 bg-cyan-500/10"
                         : "border-white/10 bg-white/5 hover:border-white/20"
-                    }`}
+                    )}
                   >
                     <div className="flex items-start gap-3">
                       {/* Radio indicator */}
                       <div
-                        className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        className={clsx(
+                          "mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
                           discountType === "reembolso"
                             ? "border-cyan-500 bg-cyan-500"
                             : "border-slate-400 bg-transparent"
-                        }`}
+                        )}
                       >
                         {discountType === "reembolso" && (
                           <div className="w-2 h-2 bg-white rounded-full" />
@@ -476,9 +482,6 @@ export default function RestaurantIVACalculator() {
                         <div className="text-sm font-medium text-white">
                           Me descuentan en estado de cuenta
                         </div>
-                        <div className="text-xs text-slate-200 mt-0.5">
-                          Pagás todo ahora. Tu banco te devuelve el descuento después
-                        </div>
                       </div>
                     </div>
                   </button>
@@ -486,20 +489,22 @@ export default function RestaurantIVACalculator() {
                   {/* Opción 2: En factura (ya descontado) */}
                   <button
                     onClick={() => setDiscountType("factura")}
-                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                    className={clsx(
+                      "w-full text-left p-3 rounded-lg border-2 transition-all",
                       discountType === "factura"
                         ? "border-cyan-500 bg-cyan-500/10"
                         : "border-white/10 bg-white/5 hover:border-white/20"
-                    }`}
+                    )}
                   >
                     <div className="flex items-start gap-3">
                       {/* Radio indicator */}
                       <div
-                        className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        className={clsx(
+                          "mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
                           discountType === "factura"
                             ? "border-cyan-500 bg-cyan-500"
                             : "border-slate-400 bg-transparent"
-                        }`}
+                        )}
                       >
                         {discountType === "factura" && (
                           <div className="w-2 h-2 bg-white rounded-full" />
@@ -509,10 +514,7 @@ export default function RestaurantIVACalculator() {
                       {/* Text content */}
                       <div className="flex-1">
                         <div className="text-sm font-medium text-white">
-                          Ya está descontado en la cuenta
-                        </div>
-                        <div className="text-xs text-slate-200 mt-0.5">
-                          El restaurant ya aplicó el descuento en lo que te cobran
+                          Ya está descontado en la factura
                         </div>
                       </div>
                     </div>
@@ -567,21 +569,23 @@ export default function RestaurantIVACalculator() {
                     <div className="flex gap-2 mb-3">
                       <button
                         onClick={() => handleTipTypeChange("porcentaje")}
-                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                        className={clsx(
+                          "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
                           tipType === "porcentaje"
                             ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
                             : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
-                        }`}
+                        )}
                       >
                         En porcentaje (%)
                       </button>
                       <button
                         onClick={() => handleTipTypeChange("fija")}
-                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                        className={clsx(
+                          "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
                           tipType === "fija"
                             ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
                             : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
-                        }`}
+                        )}
                       >
                         Monto fijo ($)
                       </button>
@@ -604,9 +608,10 @@ export default function RestaurantIVACalculator() {
                             : handleFixedTipChange(e.target.value)
                         }
                         placeholder={tipType === "porcentaje" ? "10" : "0.00"}
-                        className={`w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all ${
+                        className={clsx(
+                          "w-full py-3 text-lg font-semibold bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all",
                           tipType === "fija" ? "pl-10 pr-4" : "pl-4 pr-10"
-                        }`}
+                        )}
                       />
                       {tipType === "porcentaje" && (
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
@@ -673,21 +678,23 @@ export default function RestaurantIVACalculator() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setIncludeTipInDiscount(false)}
-                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                        className={clsx(
+                          "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
                           !includeTipInDiscount
                             ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
                             : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
-                        }`}
+                        )}
                       >
                         No
                       </button>
                       <button
                         onClick={() => setIncludeTipInDiscount(true)}
-                        className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                        className={clsx(
+                          "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
                           includeTipInDiscount
                             ? "bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300"
                             : "bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10"
-                        }`}
+                        )}
                       >
                         Sí
                       </button>
@@ -722,14 +729,16 @@ export default function RestaurantIVACalculator() {
                       className="flex items-center gap-2"
                     >
                       <div
-                        className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+                        className={clsx(
+                          "relative w-11 h-6 rounded-full transition-colors duration-300",
                           splitEnabled ? "bg-cyan-500" : "bg-white/20"
-                        }`}
+                        )}
                       >
                         <div
-                          className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
+                          className={clsx(
+                            "absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300",
                             splitEnabled ? "left-6" : "left-1"
-                          }`}
+                          )}
                         />
                       </div>
                     </button>
