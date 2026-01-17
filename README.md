@@ -68,7 +68,7 @@ MIT
 La Ley 17.934 de Uruguay permite la devolución del 9% del IVA en compras realizadas con tarjetas de débito en restaurantes y establecimientos gastronómicos.
 
 ### Descuentos de Tarjetas
-Muchas tarjetas de crédito ofrecen descuentos adicionales en gastronomía (ej: Scotiabank 25%, Itaú 20%, etc.). Esta calculadora te ayuda a ver el precio final combinando ambos beneficios.
+Muchas tarjetas de crédito ofrecen descuentos adicionales en gastronomía. Esta calculadora te ayuda a ver el precio final combinando ambos beneficios.
 
 ## 🏗️ Arquitectura y Flujo de Negocio
 

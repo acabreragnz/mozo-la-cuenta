@@ -435,11 +435,11 @@ export default function RestaurantIVACalculator() {
 
         <div className="space-y-4 mb-6">
           <div className="animate-fade-in-right animate-delay-300">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-200 mb-2">
               Total de la cuenta
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-medium">
                 $
               </span>
               <input
@@ -460,7 +460,7 @@ export default function RestaurantIVACalculator() {
               />
             </div>
             {expressionHasOperator && (
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-300 mt-1">
                 = <MoneyFlow value={numericAmount} />
               </p>
             )}
@@ -475,7 +475,7 @@ export default function RestaurantIVACalculator() {
               </p>
             )}
             {amountExpression.trim() === "" && (
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-300 mt-1">
                 Podés usar +, -, *, /
               </p>
             )}
@@ -483,7 +483,7 @@ export default function RestaurantIVACalculator() {
 
           <div className="animate-fade-in-right animate-delay-[350ms]">
             {/* Pregunta */}
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-200 mb-2">
               ¿Desea agregar propina?
             </label>
 
@@ -517,15 +517,15 @@ export default function RestaurantIVACalculator() {
 
             {/* Hint cuando selecciona Sí */}
             {wantsTip && (
-              <p className="text-xs text-slate-400 mt-2 animate-fade-in">
+              <p className="text-xs text-slate-300 mt-2 animate-fade-in">
                 Propina {tipType === "porcentaje" ? `${tipPercentage}%` : `$${fixedTip || "0"}`} = <MoneyFlow value={numericTip} />
-                <span className="text-slate-500"> · Cambialo en Ajustes avanzados</span>
+                <span className="text-slate-300"> · Cambialo en Ajustes avanzados</span>
               </p>
             )}
           </div>
 
           <div className="animate-fade-in-right animate-delay-[400ms]">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-200 mb-2">
               Descuento de tarjeta
             </label>
             <div className="relative">
@@ -542,7 +542,7 @@ export default function RestaurantIVACalculator() {
                 %
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-300 mt-1">
               Ingresá el % que te ofrece tu banco
             </p>
 
@@ -569,8 +569,8 @@ export default function RestaurantIVACalculator() {
                           descuento después en tu estado de cuenta.
                         </p>
                         <p className="text-slate-400 mt-1 text-[11px]">
-                          Ejemplo: Cuenta $1000 con 20% → pagás $1000, te
-                          devuelven $200 en el estado de cuenta
+                          Ejemplo: Cuenta $1000 → pagás $1000, te devuelven el
+                          descuento en el estado de cuenta
                         </p>
                       </div>
                       <div className="border-t border-slate-600 pt-2">
@@ -670,7 +670,7 @@ export default function RestaurantIVACalculator() {
             {wantsTip && discountType === "reembolso" && discountPercentage > 0 && (
               <p className="text-xs text-slate-400 mt-2">
                 💡 La propina {includeTipInDiscount ? "está incluida" : "no está incluida"} en el descuento
-                <span className="text-slate-500"> · Podés cambiarlo en Ajustes avanzados</span>
+                <span className="text-slate-300"> · Podés cambiarlo en Ajustes avanzados</span>
               </p>
             )}
           </div>
@@ -693,7 +693,7 @@ export default function RestaurantIVACalculator() {
                   </h3>
                   <button
                     onClick={() => setShowAdvancedSettings(false)}
-                    className="w-8 h-8 flex items-center justify-center text-xl text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                    className="w-8 h-8 flex items-center justify-center text-xl text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                     aria-label="Cerrar ajustes avanzados"
                   >
                     ✕
@@ -704,7 +704,7 @@ export default function RestaurantIVACalculator() {
                 {wantsTip && (
                   <div>
                     {/* Label */}
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-200 mb-2">
                       ¿Cómo querés calcular la propina?
                     </label>
 
@@ -782,7 +782,7 @@ export default function RestaurantIVACalculator() {
                 {wantsTip && discountType === "reembolso" && discountPercentage > 0 && (
                   <div className="border-t border-slate-700/50 pt-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <label className="block text-sm font-medium text-slate-300">
+                      <label className="block text-sm font-medium text-slate-200">
                         ¿Incluir propina en el descuento?
                       </label>
                       <InfoTooltip
@@ -871,7 +871,7 @@ export default function RestaurantIVACalculator() {
                 {/* Dividir cuenta Section */}
                 <div className="border-t border-slate-700/50 pt-4">
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-slate-300">
+                    <label className="block text-sm font-medium text-slate-200">
                       Dividir cuenta
                     </label>
                     <button
@@ -925,7 +925,7 @@ export default function RestaurantIVACalculator() {
 
                 {/* IVA Section */}
                 <div className="border-t border-slate-700/50 pt-4">
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-200 mb-2">
                     Devolución IVA (%)
                   </label>
                   <div className="relative">
@@ -1034,7 +1034,7 @@ export default function RestaurantIVACalculator() {
                     Dto. tarjeta ({discountPercentage}%)
                   </span>
                   {numericTip > 0 && (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-400">
                       {includeTipInDiscount
                         ? "Sobre cuenta + propina"
                         : "Solo sobre cuenta"}
@@ -1053,7 +1053,7 @@ export default function RestaurantIVACalculator() {
                   <span className="text-cyan-400">
                     Devolución IVA ({vatRefund}%)
                   </span>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-400">
                     Sobre gravado $ {formatMoney(taxableAmount)}
                   </p>
                 </div>
@@ -1276,13 +1276,21 @@ export default function RestaurantIVACalculator() {
         )}
 
         {!hasResults && (
-          <div className="text-center py-6 text-slate-500 animate-fade-in animate-delay-500">
+          <div className="text-center py-6 text-slate-400 animate-fade-in animate-delay-500">
             <p>Ingresá el monto para calcular</p>
           </div>
         )}
 
-        <p className="text-center text-xs text-slate-600 mt-4 animate-fade-in animate-delay-[550ms]">
-          Devolución IVA acreditada automáticamente
+        <p className="text-center text-xs text-slate-400 mt-4 animate-fade-in animate-delay-[550ms]">
+          Hecho con 💙 por{" "}
+          <a
+            href="https://github.com/acabreragnz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-400 hover:text-cyan-300 transition-colors underline"
+          >
+            @acabreragnz
+          </a>
         </p>
       </div>
     </div>
